@@ -37,6 +37,10 @@ package kacount {
 			this._monsters = new Vector.<Monster>();
 		}
 		
+		public function get players():Vector.<MovieClip> {
+			return this._players.slice();
+		}
+
 		public function get spawnPoints():Vector.<SpawnPoint> {
 			return this._spawnPoints.slice();
 		}

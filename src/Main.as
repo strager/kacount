@@ -1,10 +1,12 @@
 package {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	import flash.utils.setInterval;
 	
@@ -31,15 +33,29 @@ package {
 		
 		private static var monsterClasses:Array = [ Monster1, Monster2, Monster3 ];
 		
-		public function Main() {
+		private function init():void {
 			this.stage.frameRate = 60;
 			this.stage.align = StageAlign.TOP_LEFT;
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
-			
+		}
+		
+		public function Main() {
+			this.init();
+			this.playRound();
+		}
+		
+		private function playRound():void {
 			var screen:DisplayObjectContainer = new Screen();
 			var gs:GameScreen = new GameScreen(screen);
 			
-			var hist:Histogram = new Histogram();
+			var monsterHist:Histogram = new Histogram();
+			var playerHist:Histogram = new Histogram();
+			
+			gs.players.forEach(function (player:MovieClip, _i:uint, _array:*):void {
+				player.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
+					playerHist.inc(player);
+				});
+			});
 			
 			var goals:Vector.<Class> = new <Class>[Monster1, Monster3];
 			
@@ -54,7 +70,7 @@ package {
 					return function (callback:Function):void {
 						MonsterSpawn.tick(delay, interval, count, function ():void {
 							var artClass:Class = rng.sample(monsterClasses);
-							hist.inc(artClass);
+							monsterHist.inc(artClass);
 							var speed:Number = rng.rand(2, 10);
 							
 							var art:DisplayObject = new artClass();
@@ -67,13 +83,24 @@ package {
 				}
 			);
 			
+			var roundDone:Boolean = false;
 			Async.join(spawners, function ():void {
-				trace("Done!");
+				roundDone = true;
 			});
 			
 			this.addChild(screen);
-			this.addEventListener(Event.ENTER_FRAME, function (event:Event):void {
+			this.addEventListener(Event.ENTER_FRAME, function onEnterFrame(event:Event):void {
 				gs.tick();
+				
+				if (roundDone && gs.monsters.length === 0) {
+					removeEventListener(event.type, arguments.callee);
+					
+					trace("So ....  there were " + monsterHist.total(goals) + " matching monsters");
+					trace("Let's see what each player wrote:");
+					for each (var player:MovieClip in gs.players) {
+						trace(player.name + ": " + playerHist.count(player));
+					}
+				}
 			});
 		}
 	}
