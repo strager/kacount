@@ -5,11 +5,16 @@ package {
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.geom.Rectangle;
+	import flash.utils.setInterval;
 	
 	import kacount.GameScreen;
 	import kacount.Monster;
 	import kacount.MonsterSpawn;
 	import kacount.SpawnPoint;
+	import kacount.util.Async;
+	import kacount.util.F;
+	import kacount.util.Histogram;
 	import kacount.util.RNG;
 	
 	[SWF(frameRate="60", width="1024", height="768")]
@@ -34,22 +39,36 @@ package {
 			var screen:DisplayObjectContainer = new Screen();
 			var gs:GameScreen = new GameScreen(screen);
 			
+			var hist:Histogram = new Histogram();
+			
+			var goals:Vector.<Class> = new <Class>[Monster1, Monster3];
+			
 			var rng:RNG = new RNG();
-			gs.spawnPoints.forEach(function (spawnPoint:SpawnPoint, _i:uint, _array:*):void {
-				var delay:Number = rng.rand(0, 2000);
-				var interval:Number = rng.rand(700, 1400);
-				var count:uint = rng.rand(4, 12);
-				
-				MonsterSpawn.tick(delay, interval, count, function ():void {
-					var artClass:Class = rng.sample(monsterClasses);
-					var speed:Number = rng.rand(2, 10);
+			var spawners:Vector.<Function> = F.map(
+				gs.spawnPoints, Vector.<Function>,
+				function (spawnPoint:SpawnPoint):Function {
+					var delay:Number = rng.rand(0, 2000);
+					var interval:Number = rng.rand(700, 1400);
+					var count:uint = rng.rand(4, 12);
 					
-					var art:DisplayObject = new artClass();
-					spawnPoint.pos.toDisplayObject(art);
-					
-					var m:Monster = new Monster(art, spawnPoint.velocity.scale1(speed));
-					gs.spawnMonster(m);
-				});
+					return function (callback:Function):void {
+						MonsterSpawn.tick(delay, interval, count, function ():void {
+							var artClass:Class = rng.sample(monsterClasses);
+							hist.inc(artClass);
+							var speed:Number = rng.rand(2, 10);
+							
+							var art:DisplayObject = new artClass();
+							spawnPoint.pos.toDisplayObject(art);
+							
+							var m:Monster = new Monster(art, spawnPoint.velocity.scale1(speed));
+							gs.spawnMonster(m);
+						}, callback);
+					};
+				}
+			);
+			
+			Async.join(spawners, function ():void {
+				trace("Done!");
 			});
 			
 			this.addChild(screen);
