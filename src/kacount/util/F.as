@@ -11,5 +11,14 @@ package kacount.util {
 			}
 			return out;
 		}
+		
+		public static function multicast(fns:*):Function {
+			fns = fns.slice();
+			return function (... args:Array):void {
+				for each (var fn:Function in fns) {
+					fn.apply(this, args);
+				}
+			};
+		}
 	}
 }

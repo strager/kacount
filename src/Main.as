@@ -17,9 +17,11 @@ package {
 	import kacount.MonsterSpawn;
 	import kacount.SpawnPoint;
 	import kacount.util.Async;
+	import kacount.util.Ev;
 	import kacount.util.F;
 	import kacount.util.Histogram;
 	import kacount.util.RNG;
+	import kacount.util.Touch;
 	
 	[SWF(frameRate="60", width="1024", height="768")]
 	public class Main extends Sprite {
@@ -59,13 +61,13 @@ package {
 			}
 			
 			gs.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
-				player.addEventListener(MouseEvent.CLICK, function onClick(event:MouseEvent):void {
+				Touch.down(player, function onDown():void {
 					playerHit(playerIndex);
 				});
 			});
 			
 			var playerKeys:Vector.<uint> = new <uint>[Keyboard.Q, Keyboard.P];
-			this.stage.addEventListener(KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
+			Ev.on(this.stage, KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
 				var playerIndex:int = playerKeys.indexOf(event.keyCode);
 				if (playerIndex >= 0) {
 					playerHit(playerIndex);
@@ -104,7 +106,7 @@ package {
 			});
 			
 			this.addChild(screen);
-			this.addEventListener(Event.ENTER_FRAME, function onEnterFrame(event:Event):void {
+			Ev.on(this, Event.ENTER_FRAME, function onEnterFrame(event:Event):void {
 				gs.tick();
 				
 				if (roundDone && gs.monsters.length === 0) {
