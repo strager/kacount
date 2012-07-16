@@ -6,8 +6,10 @@ package {
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
+	import flash.ui.Keyboard;
 	import flash.utils.setInterval;
 	
 	import kacount.GameScreen;
@@ -51,10 +53,23 @@ package {
 			var monsterHist:Histogram = new Histogram();
 			var playerHist:Histogram = new Histogram();
 			
-			gs.players.forEach(function (player:MovieClip, _i:uint, _array:*):void {
-				player.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
-					playerHist.inc(player);
+			function playerHit(playerIndex:uint):void {
+				playerHist.inc(playerIndex);
+				gs.players[playerIndex].gotoAndPlay('click');
+			}
+			
+			gs.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
+				player.addEventListener(MouseEvent.CLICK, function onClick(event:MouseEvent):void {
+					playerHit(playerIndex);
 				});
+			});
+			
+			var playerKeys:Vector.<uint> = new <uint>[Keyboard.Q, Keyboard.P];
+			this.stage.addEventListener(KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
+				var playerIndex:int = playerKeys.indexOf(event.keyCode);
+				if (playerIndex >= 0) {
+					playerHit(playerIndex);
+				}
 			});
 			
 			var goals:Vector.<Class> = new <Class>[Monster1, Monster3];
@@ -97,9 +112,9 @@ package {
 					
 					trace("So ....  there were " + monsterHist.total(goals) + " matching monsters");
 					trace("Let's see what each player wrote:");
-					for each (var player:MovieClip in gs.players) {
-						trace(player.name + ": " + playerHist.count(player));
-					}
+					gs.players.forEach(function (_:*, playerIndex:uint, _array:*):void {
+						trace("Player " + playerIndex + ": " + playerHist.count(uint(playerIndex)));
+					});
 				}
 			});
 		}
