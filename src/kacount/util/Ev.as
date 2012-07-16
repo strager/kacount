@@ -9,13 +9,13 @@ package kacount.util {
 			function wrapper(event:Event):void {
 				handler(event);
 			}
-			
+
 			ed.addEventListener(eventType, wrapper, useCapture);
-			
+
 			function cancel():void {
 				ed.removeEventListener(eventType, wrapper, useCapture);
 			}
-			
+
 			return new Cancel(cancel);
 		}
 	}

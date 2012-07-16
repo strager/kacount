@@ -4,7 +4,7 @@ package kacount {
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.setTimeout;
-	
+
 	import org.osmf.events.TimeEvent;
 
 	public final class MonsterSpawn {
@@ -17,9 +17,9 @@ package kacount {
 			artClass:Class,
 			gameScreen:GameScreen
 		):void {
-			
+
 		}
-		
+
 		public static function tick(
 			delay:Number,
 			interval:Number,

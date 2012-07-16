@@ -3,7 +3,7 @@ package kacount.util {
 		public static function id(x:*, ... _rest:Array):* {
 			return x;
 		}
-		
+
 		public static function map(xs:*, ctor:*, fn:Function):* {
 			var out:* = new ctor();
 			for each (var x:* in xs) {
@@ -11,7 +11,7 @@ package kacount.util {
 			}
 			return out;
 		}
-		
+
 		public static function multicast(fns:*):Function {
 			fns = fns.slice();
 			return function (... args:Array):void {

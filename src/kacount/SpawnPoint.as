@@ -1,7 +1,7 @@
 package kacount {
 	import flash.display.DisplayObject;
 	import flash.utils.getQualifiedClassName;
-	
+
 	import kacount.util.Vec2;
 
 	public final class SpawnPoint {
@@ -11,7 +11,7 @@ package kacount {
 		public function SpawnPoint(pos:Vec2, velocity:Vec2) {
 			this._pos = pos;
 			this._velocity = velocity;
-		}		
+		}
 
 		public function get pos():Vec2 { return _pos; }
 		public function get velocity():Vec2 { return _velocity; }

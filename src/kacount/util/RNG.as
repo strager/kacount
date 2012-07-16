@@ -4,7 +4,7 @@ package kacount.util {
 			// TODO
 			return (Math.random() * (hi - lo)) + lo;
 		}
-		
+
 		public function sample(xs:*):* {
 			return xs[uint(this.rand() * xs.length)];
 		}
