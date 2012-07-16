@@ -29,7 +29,7 @@ package kacount {
 			
 			this._despawnRegions = F.map(
 				getNumbered(art, 'despawn'), Vector.<Rectangle>,
-				function (x:DisplayObject) {
+				function (x:DisplayObject):Rectangle {
 					return x.getBounds(art);
 				}
 			);
