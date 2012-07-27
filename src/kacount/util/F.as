@@ -12,6 +12,28 @@ package kacount.util {
 			return out;
 		}
 
+		/**
+		 * For each element x in xs, yields x
+		 * if x is the first value equal to x in xs.
+		 *
+		 * In other words, removes duplicates from
+		 * the given collection.
+		 */
+		public static function nub(xs:*):* {
+			return xs.filter(function (x:*, i:uint, _array:*):Boolean {
+				return xs.indexOf(x) === i;
+			});
+		}
+		
+		/**
+		 * Returns a function which looks up propName in its first argument.
+		 */
+		public static function lookup(propName:*):Function {
+			return function (obj:Object, ... _rest:Array):* {
+				return obj[propName];
+			};
+		}
+		
 		public static function multicast(fns:*):Function {
 			fns = fns.slice();
 			return function (... args:Array):void {
@@ -19,6 +41,19 @@ package kacount.util {
 					fn.apply(this, args);
 				}
 			};
+		}
+		
+		// ECMAScript-262 5th edition Function#bind
+		private static var nativeBind:Function = Function.prototype['bind'];
+		
+		public static function bind(fn:Function, self:Object):Function {
+			if (nativeBind === null) {
+				return function (... args:Array):* {
+					return fn.apply(self, args);
+				}
+			} else {
+				return nativeBind.call(fn, self);
+			}
 		}
 	}
 }
