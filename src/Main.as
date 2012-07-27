@@ -11,11 +11,12 @@ package {
 	import flash.geom.Rectangle;
 	import flash.ui.Keyboard;
 	import flash.utils.setInterval;
-
+	
 	import kacount.GameScreen;
 	import kacount.Monster;
 	import kacount.MonsterSpawn;
 	import kacount.SpawnPoint;
+	import kacount.art.*;
 	import kacount.util.Async;
 	import kacount.util.Ev;
 	import kacount.util.F;
@@ -25,16 +26,6 @@ package {
 
 	[SWF(frameRate="60", width="1024", height="768")]
 	public class Main extends Sprite {
-		[Embed(source="game.swf", symbol="Screen")]
-		private static var Screen:Class;
-
-		[Embed(source="game.swf", symbol="Monster1")]
-		private static var Monster1:Class;
-		[Embed(source="game.swf", symbol="Monster2")]
-		private static var Monster2:Class;
-		[Embed(source="game.swf", symbol="Monster3")]
-		private static var Monster3:Class;
-
 		private static var monsterClasses:Array = [ Monster1, Monster2, Monster3 ];
 
 		private function init():void {
