@@ -8,18 +8,6 @@ package kacount {
 	import org.osmf.events.TimeEvent;
 
 	public final class MonsterSpawn {
-		public static function spawn(
-			delay:Number,
-			interval:Number,
-			count:uint,
-			spawnPoint:SpawnPoint,
-			speed:Number,
-			artClass:Class,
-			gameScreen:GameScreen
-		):void {
-
-		}
-
 		public static function tick(
 			delay:Number,
 			interval:Number,
