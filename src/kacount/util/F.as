@@ -103,5 +103,19 @@ package kacount.util {
 				return nativeBind.call(fn, self);
 			}
 		}
+		
+		public static function ofType(xs:*, cls:Class):Array {
+			return ofTypec(xs, cls, Array);
+		}
+		
+		public static function ofTypec(xs:*, cls:Class, vectorCls:Class):* {
+			var v:* = new vectorCls();
+			for each (var x:* in xs) {
+				if (x is cls) {
+					v.push(x);
+				}
+			}
+			return v;
+		}
 	}
 }

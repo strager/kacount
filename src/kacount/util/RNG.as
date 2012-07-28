@@ -15,6 +15,9 @@ package kacount.util {
 		}
 
 		public function sample(xs:*):* {
+			if (xs.length === 0) {
+				throw new Error("Can't sample an empty collection");
+			}
 			return xs[uint(this.rand() * xs.length)];
 		}
 	}

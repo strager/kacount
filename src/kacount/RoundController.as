@@ -45,9 +45,6 @@ package kacount {
 			g.lineStyle(5, 0xFF00FF, 1);
 			root.addChild(s);
 			
-			var startRegion:Rectangle = new Rectangle(0, 0, 50, 400);
-			var endRegion:Rectangle = new Rectangle(500, 0, 50, 400);
-			var walkRegion:Rectangle = new Rectangle(50, 0, 400, 400);
 			var rng:RNG = new RNG();
 			
 			var art:DisplayObjectContainer = new Screen();
@@ -83,8 +80,15 @@ package kacount {
 				var artClass:Class = rng.sample(monsterClasses);
 				_monsterHist.inc(artClass);
 				
+				var startRegion:Rectangle = rng.sample(_gs.spawnRegions);
+				var endRegion:Rectangle = rng.sample(_gs.despawnRegions);
+				var walkRegion:Rectangle = _gs.walkRegion;
+				
 				var art:DisplayObject = new artClass();
-				var route:IRoute = rng.sample(RouteGenerators.generators)(startRegion, endRegion, walkRegion, rng);
+				var route:IRoute = rng.sample(RouteGenerators.generators)(
+					startRegion, endRegion,
+					walkRegion, rng
+				);
 				route.debugDraw(g);
 				
 				var m:Monster = new Monster(art, route);
