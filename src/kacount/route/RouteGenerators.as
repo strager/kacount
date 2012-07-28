@@ -35,7 +35,6 @@ package kacount.route {
 			var segCount:uint = rng.integer(2, 10);
 			var xCoords:Array = F.replicateM(segCount - 1, rng.double, walkRegion.left, walkRegion.right);
 			xCoords.sort(Num.compare);
-			trace(xCoords.join(', '));
 			
 			if (endRegion.left < startRegion.right) {
 				todo("Handle endRegion left of startRegion");

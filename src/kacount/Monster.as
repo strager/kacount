@@ -7,27 +7,29 @@ package kacount {
 		private var _art:DisplayObject;
 		private var _route:IRoute;
 		
-		private var curT:Number = 0;
+		private var _curT:Number = 0;
+		private var _speed:Number;     // t per tick
 
 		public function Monster(art:DisplayObject, route:IRoute) {
 			this._art = art;
 			this._route = route;
+			this._speed = 10 / route.weight();
 			this.update();
 		}
 
 		public function get art():DisplayObject { return _art; }
 		
 		public function get routeDone():Boolean {
-			return this.curT >= 1;
+			return this._curT >= 1;
 		}
 
 		public function tick():void {
-			this.curT = Math.min(0.01 + this.curT, 1);
+			this._curT = Math.min(this._speed + this._curT, 1);
 			this.update();
 		}
 		
 		private function update():void {
-			this.updateTo(this.curT);
+			this.updateTo(this._curT);
 		}
 		
 		private function updateTo(t:Number):void {
