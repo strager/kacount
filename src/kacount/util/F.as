@@ -29,6 +29,7 @@ package kacount.util {
 			for each (var x:* in xs) {
 				if (first) {
 					acc = x;
+					first = false;
 				} else {
 					acc = fn(acc, x);
 				}
@@ -39,6 +40,27 @@ package kacount.util {
 			}
 			
 			return acc;
+		}
+		
+		/**
+		 * Calls a function a number of times.
+		 */
+		public static function replicateM(n:uint, fn:Function, ... args:Array):Array {
+			var xs:Array = [];
+			for (var i:uint = 0; i < n; ++i) {
+				xs.push(fn.apply(null, args));
+			}
+			return xs;
+		}
+		
+		public static function zipWithc(xs:*, ys:*, ctor:*, fn:Function, ... args:Array):* {
+			var zs:* = new ctor();
+			for (var i:String in xs) {
+				if (i in ys) {
+					zs.push(fn(xs[i], ys[i]));
+				}
+			}
+			return zs;
 		}
 		
 		/**
@@ -79,6 +101,30 @@ package kacount.util {
 		public static function call(... args:Array):Function {
 			return function (fn:Function, ... _rest:Array):* {
 				return fn.apply(null, args);
+			};
+		}
+		
+		private static const constructTable:Vector.<Function> = new <Function>[
+			function():Object { return new this(); },
+			function(a1:*):Object { return new this(a1); },
+			function(a1:*, a2:*):Object { return new this(a1, a2); },
+			function(a1:*, a2:*, a3:*):Object { return new this(a1, a2, a3); },
+			function(a1:*, a2:*, a3:*, a4:*):Object { return new this(a1, a2, a3, a4); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*):Object { return new this(a1, a2, a3, a4, a5); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*, a6:*):Object { return new this(a1, a2, a3, a4, a5, a6); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*, a6:*, a7:*):Object { return new this(a1, a2, a3, a4, a5, a6, a7); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*, a6:*, a7:*, a8:*):Object { return new this(a1, a2, a3, a4, a5, a6, a7, a8); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*, a6:*, a7:*, a8:*, a9:*):Object { return new this(a1, a2, a3, a4, a5, a6, a7, a8, a9); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*, a6:*, a7:*, a8:*, a9:*, a10:*):Object { return new this(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); },
+			function(a1:*, a2:*, a3:*, a4:*, a5:*, a6:*, a7:*, a8:*, a9:*, a10:*, a11:*):Object { return new this(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11); },
+		];
+		
+		/**
+		 * Returns a function which constructs an instance of a class.
+		 */
+		public static function construct(cls:Class):Function {
+			return function (... args:Array):Object {
+				return constructTable[args.length].apply(cls, args);
 			};
 		}
 		

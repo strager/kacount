@@ -27,16 +27,20 @@ package kacount.route {
 		}
 		
 		private function segTAt(t:Number):SegT {
+			if (t <= 0) return new SegT(this._segments[0], 0);
+			if (t >= 1) return new SegT(this._segments[this._segments.length - 1], 1);
+			
 			var totalW:Number = this.weight();
 			var curW:Number = 0;
 			var tW:Number = t * totalW;
 			
 			for each (var seg:IRoute in this._segments) {
 				var nextW:Number = curW + seg.weight();
-				if (curW > tW) {
+				if (nextW > tW) {
 					var innerT:Number = Num.unlerp(curW, nextW, tW);
 					return new SegT(seg, innerT);
 				}
+				curW = nextW;
 			}
 			
 			throw new RangeError("Could not find segment at t=" + t);
@@ -54,7 +58,7 @@ package kacount.route {
 	}
 }
 
-import kacount.IRoute;
+import kacount.route.IRoute;
 
 // Awesome tuple type!
 class SegT {

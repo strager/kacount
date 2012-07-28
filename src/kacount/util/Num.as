@@ -7,6 +7,12 @@ package kacount.util {
 			return a + b;
 		}
 		
+		public static function compare(a:Number, b:Number, ... _rest:Array):int {
+			if (a < b) return -1;
+			if (a > b) return 1;
+			return 0;
+		}
+		
 		public static function lerp(a:Number, b:Number, t:Number):Number {
 			return (b - a) * t + a;
 		}

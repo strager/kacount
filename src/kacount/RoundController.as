@@ -72,9 +72,9 @@ package kacount {
 
 			_goals = new <Class>[Monster1, Monster3];
 			
-			var delay:Number = rng.rand(0, 2000);
-			var interval:Number = rng.rand(700, 1400);
-			var count:uint = rng.rand(8, 20);
+			var delay:Number = rng.double(0, 2000);
+			var interval:Number = rng.double(700, 1400);
+			var count:uint = rng.double(8, 20);
 			
 			MonsterSpawn.tick(delay, interval, count, function ():void {
 				var artClass:Class = rng.sample(monsterClasses);
