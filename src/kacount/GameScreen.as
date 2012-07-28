@@ -3,9 +3,8 @@ package kacount {
 	import flash.display.DisplayObjectContainer;
 	import flash.display.MovieClip;
 	import flash.geom.Rectangle;
-
+	
 	import kacount.util.F;
-	import kacount.util.Vec2;
 
 	public final class GameScreen {
 		private var _art:DisplayObjectContainer;
@@ -17,21 +16,19 @@ package kacount {
 		public function GameScreen(art:DisplayObjectContainer) {
 			this._art = art;
 
-			this._spawnPoints = F.map(
+			this._spawnPoints = F.mapc(
 				getNumbered(art, 'spawn'), Vector.<SpawnPoint>,
 				SpawnPoint.fromArt
 			);
 
-			this._players = F.map(
+			this._players = F.mapc(
 				getNumbered(art, 'player'), Vector.<MovieClip>,
 				F.id
 			);
 
-			this._despawnRegions = F.map(
+			this._despawnRegions = F.mapc(
 				getNumbered(art, 'despawn'), Vector.<Rectangle>,
-				function (x:DisplayObject):Rectangle {
-					return x.getBounds(art);
-				}
+				F.invoke('getBounds', art)
 			);
 
 			this._monsters = new Vector.<Monster>();
@@ -65,23 +62,14 @@ package kacount {
 
 		public function tick():void {
 			var m:Monster;
-
-			for each (var despawnRegion:Rectangle in this._despawnRegions) {
-				for each (m in this.monstersInside(despawnRegion)) {
-					this.despawnMonster(m);
-				}
-			}
-
+			
 			for each (m in this._monsters) {
 				m.tick();
 			}
-		}
-
-		private function monstersInside(bounds:Rectangle):Vector.<Monster> {
-			return this._monsters.filter(function (m:Monster, _i:uint, _array:*):Boolean {
-				var mBounds:Rectangle = m.art.getBounds(this._art);
-				return mBounds.intersects(bounds);
-			}, this);
+			
+			for each (m in this._monsters.filter(F.lookup('routeDone'))) {
+				this.despawnMonster(m);
+			}
 		}
 
 		private static function getNumbered(art:DisplayObjectContainer, prefix:String):Vector.<DisplayObject> {

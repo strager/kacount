@@ -3,7 +3,7 @@ package kacount.util {
 		private var _transitions:Vector.<StateTransition>;
 		
 		public function StateMachineTemplate(transitions:*) {
-			this._transitions = F.map(transitions, Vector.<StateTransition>, StateTransition.fromJSON);
+			this._transitions = F.mapc(transitions, Vector.<StateTransition>, StateTransition.fromJSON);
 		}
 		
 		public function create(initialState:String, callbacks:Object):StateMachine {
@@ -52,7 +52,7 @@ package kacount.util {
 		}
 		
 		private function transitionLookup(propName:String):Vector.<String> {
-			return F.nub(F.map(
+			return F.nub(F.mapc(
 				this._transitions, Vector.<String>,
 				F.lookup(propName)
 			));

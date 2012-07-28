@@ -1,19 +1,19 @@
 package kacount {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.Graphics;
 	import flash.display.MovieClip;
-	import flash.events.Event;
+	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
+	import flash.geom.Rectangle;
 	import flash.ui.Keyboard;
 	
 	import kacount.art.*;
-	import kacount.util.Async;
-	import kacount.util.Cancel;
+	import kacount.route.IRoute;
+	import kacount.route.RouteGenerators;
 	import kacount.util.Ev;
-	import kacount.util.F;
 	import kacount.util.Histogram;
 	import kacount.util.RNG;
-	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
 	import kacount.util.Touch;
 
@@ -27,19 +27,39 @@ package kacount {
 			{ name: 'next',  from: 'score',        to: 'end' },
 		]);
 		
+		private var _gs:GameScreen;
+		private var _roundDone:Boolean = false;
+		
+		private var _doneCallback:Function;
+
+		private var _monsterHist:Histogram = new Histogram();
+		private var _playerHist:Histogram = new Histogram();
+
+		private var _goals:Vector.<Class>;
+		
 		public function RoundController(root:DisplayObjectContainer, doneCallback:Function) {
-			var screen:DisplayObjectContainer = new Screen();
-			var gs:GameScreen = new GameScreen(screen);
+			this._doneCallback = doneCallback;
 			
-			var monsterHist:Histogram = new Histogram();
-			var playerHist:Histogram = new Histogram();
+			var s:Sprite = new Sprite();
+			var g:Graphics = s.graphics;
+			g.lineStyle(5, 0xFF00FF, 1);
+			root.addChild(s);
+			
+			var startRegion:Rectangle = new Rectangle(0, 0, 50, 400);
+			var endRegion:Rectangle = new Rectangle(500, 0, 50, 400);
+			var walkRegion:Rectangle = new Rectangle(50, 0, 400, 400);
+			var rng:RNG = new RNG();
+			
+			var art:DisplayObjectContainer = new Screen();
+			this._gs = new GameScreen(art);
+			root.addChild(art);
 			
 			function playerHit(playerIndex:uint):void {
-				playerHist.inc(playerIndex);
-				gs.players[playerIndex].gotoAndPlay('click');
+				_playerHist.inc(playerIndex);
+				_gs.players[playerIndex].gotoAndPlay('click');
 			}
 			
-			gs.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
+			this._gs.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
 				Touch.down(player, function onDown():void {
 					playerHit(playerIndex);
 				});
@@ -52,55 +72,41 @@ package kacount {
 					playerHit(playerIndex);
 				}
 			});
+
+			_goals = new <Class>[Monster1, Monster3];
 			
-			var goals:Vector.<Class> = new <Class>[Monster1, Monster3];
+			var delay:Number = rng.rand(0, 2000);
+			var interval:Number = rng.rand(700, 1400);
+			var count:uint = rng.rand(8, 20);
 			
-			var rng:RNG = new RNG();
-			var spawners:Vector.<Function> = F.map(
-				gs.spawnPoints, Vector.<Function>,
-				function (spawnPoint:SpawnPoint):Function {
-					var delay:Number = rng.rand(0, 2000);
-					var interval:Number = rng.rand(700, 1400);
-					var count:uint = rng.rand(4, 4);
-					
-					return function (callback:Function):void {
-						MonsterSpawn.tick(delay, interval, count, function ():void {
-							var artClass:Class = rng.sample(monsterClasses);
-							monsterHist.inc(artClass);
-							var speed:Number = rng.rand(2, 10);
-							
-							var art:DisplayObject = new artClass();
-							spawnPoint.pos.toDisplayObject(art);
-							
-							var m:Monster = new Monster(art, spawnPoint.velocity.scale1(speed));
-							gs.spawnMonster(m);
-						}, callback);
-					};
-				}
-			);
-			
-			var roundDone:Boolean = false;
-			Async.join(spawners, function ():void {
-				roundDone = true;
-			});
-			
-			root.addChild(screen);
-			var cancelEnterFrame:Cancel = Ev.on(root, Event.ENTER_FRAME, function onEnterFrame(event:Event):void {
-				gs.tick();
+			MonsterSpawn.tick(delay, interval, count, function ():void {
+				var artClass:Class = rng.sample(monsterClasses);
+				_monsterHist.inc(artClass);
 				
-				if (roundDone && gs.monsters.length === 0) {
-					cancelEnterFrame.cancel();
-					
-					trace("So ....  there were " + monsterHist.total(goals) + " matching monsters");
-					trace("Let's see what each player wrote:");
-					gs.players.forEach(function (_:*, playerIndex:uint, _array:*):void {
-						trace("Player " + playerIndex + ": " + playerHist.count(uint(playerIndex)));
-					});
-					
-					root.removeChild(screen);
-					doneCallback();
-				}
+				var art:DisplayObject = new artClass();
+				var route:IRoute = rng.sample(RouteGenerators.generators)(startRegion, endRegion, walkRegion, rng);
+				route.debugDraw(g);
+				
+				var m:Monster = new Monster(art, route);
+				_gs.spawnMonster(m);
+			}, function ():void {
+				_roundDone = true;
 			});
+		}
+		
+		public override function tick():void {
+			this._gs.tick();
+			
+			if (this._roundDone && this._gs.monsters.length === 0) {
+				trace("So ....  there were " + _monsterHist.total(_goals) + " matching monsters");
+				trace("Let's see what each player wrote:");
+				this._gs.players.forEach(function (_:*, playerIndex:uint, _array:*):void {
+					trace("Player " + playerIndex + ": " + _playerHist.count(uint(playerIndex)));
+				});
+				
+				this._doneCallback();
+			}
+
 		}
 	}
 }

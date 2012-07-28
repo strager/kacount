@@ -42,7 +42,7 @@ package kacount.util {
 					+ " from '" + this._state + "'"
 				);
 			} else {
-				var destinations:Vector.<String> = F.map(
+				var destinations:Vector.<String> = F.mapc(
 					ts, Vector.<String>,
 					function (x:StateTransition):String {
 						return x.to;

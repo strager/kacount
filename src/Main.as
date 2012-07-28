@@ -1,4 +1,5 @@
 package {
+	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -42,11 +43,17 @@ package {
 		}
 		
 		public function enter_playing():void {
-			this.setController(new RoundController(this, this._sm.next_round));
+			this.setController(function (screen:DisplayObjectContainer):Controller {
+				return new RoundController(screen, _sm.next_round);
+			});
 		}
 		
-		private function setController(c:Controller):void {
-			this._currentController = c;
+		private function setController(fn:Function):void {
+			var s:Sprite = new Sprite();
+			this.removeChildren();
+			this.addChild(s);
+			
+			this._currentController = fn(s);
 		}
 	}
 }

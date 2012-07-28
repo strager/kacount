@@ -17,7 +17,7 @@ package kacount.util {
 		}
 
 		public function counts(keys:*):Vector.<uint> {
-			return F.map(keys, Vector.<uint>, this.count);
+			return F.mapc(keys, Vector.<uint>, this.count);
 		}
 
 		public function total(keys:*):uint {

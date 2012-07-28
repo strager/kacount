@@ -21,7 +21,7 @@ package kacount.util {
 		}
 
 		public static function join(cancels:*):Cancel {
-			return new Cancel(F.multicast(F.map(
+			return new Cancel(F.multicast(F.mapc(
 				cancels, Vector.<Function>,
 				function (cancel:Cancel):Function {
 					return cancel._callback;
