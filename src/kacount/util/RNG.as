@@ -17,6 +17,10 @@ package kacount.util {
 				this.double(region.top, region.bottom)
 			);
 		}
+		
+		public function bool(probability:Number = 0.5):Boolean {
+			return this.double() < probability;
+		}
 
 		public function sample(xs:*):* {
 			if (xs.length === 0) {

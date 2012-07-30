@@ -14,12 +14,14 @@ package kacount {
 	import kacount.sound.Bloop;
 	import kacount.util.Async;
 	import kacount.util.Cancel;
+	import kacount.util.Countdown;
 	import kacount.util.Display;
 	import kacount.util.Ev;
 	import kacount.util.F;
 	import kacount.util.Histogram;
 	import kacount.util.Human;
 	import kacount.util.RNG;
+	import kacount.util.Radioactive;
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
 	import kacount.util.Touch;
@@ -124,14 +126,8 @@ package kacount {
 					playerHit(playerIndex);
 				}
 			}));
-
-			var delay:Number = this._rng.double(0, 2000);
-			var interval:Number = this._rng.double(700, 1400);
-			var count:uint = this._rng.double(8, 20);
 			
-			var roundDone:Boolean = false;
-			
-			MonsterSpawn.tick(delay, interval, count, function ():void {
+			var spawner:Radioactive = new Radioactive(this._rng, 1 / 60, function ():void {
 				var artClass:Class = _rng.sample(monsterClasses);
 				_monsterHist.inc(artClass);
 				
@@ -151,16 +147,28 @@ package kacount {
 				
 				var m:Monster = new Monster(art, route);
 				gs.spawnMonster(m);
-			}, function ():void {
-				roundDone = true;
+			});
+			
+			var spawnMonsters:Boolean = true;
+			
+			var spawnFrameCount:uint = this._rng.integer(8, 12) * 60;
+			var countdown:Countdown = new Countdown(spawnFrameCount, function ():void {
+				spawnMonsters = false;
+				
+				addCancel(onTick(function ():void {
+					if (gs.monsters.length === 0) {
+						_sm.stop();
+					}
+				}));
 			});
 			
 			this.addCancel(this.onTick(function ():void {
-				gs.tick();
-				
-				if (roundDone && gs.monsters.length === 0) {
-					_sm.stop();
+				if (spawnMonsters) {
+					spawner.poke();
 				}
+				
+				countdown.dec();
+				gs.tick();
 			}));
 		}
 		
