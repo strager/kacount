@@ -33,8 +33,8 @@ package kacount.util {
 				var t:StateTransition = ts[0];
 				this.callExit(t.from, args);
 				this.callOn(t.name, args);
-				this.callEnter(t.to, args);
 				this._state = t.to;
+				this.callEnter(t.to, args);
 			} else if (ts.length === 0) {
 				throw new Error(
 					"Cannot transition '" + transitionName + "'"

@@ -10,5 +10,18 @@ package kacount.util {
 			}
 			return v;
 		}
+		
+		public static function replace(original:DisplayObject, replacement:DisplayObject):void {
+			var p:DisplayObjectContainer = original.parent;
+			if (!p) {
+				throw new Error("original must have a parent");
+			}
+			
+			var index:uint = p.getChildIndex(original);
+			p.removeChildAt(index);
+			p.addChildAt(replacement, index);
+			
+			replacement.transform = original.transform;
+		}
 	}
 }

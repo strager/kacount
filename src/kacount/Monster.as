@@ -1,6 +1,7 @@
 package kacount {
 	import flash.display.DisplayObject;
 	
+	import kacount.art.*;
 	import kacount.route.IRoute;
 
 	public final class Monster {
@@ -35,6 +36,15 @@ package kacount {
 		private function updateTo(t:Number):void {
 			this._route.point(t).toDisplayObject(this.art);
 			this.art.rotation = this._route.delta(t).toDegrees();
+		}
+		
+		public static function getLabeledClass(monsterCls:Class):Class {
+			switch (monsterCls) {
+			case Monster1: return Monster1Labeled;
+			case Monster2: return Monster2Labeled;
+			case Monster3: return Monster3Labeled;
+			default: throw new Error("Unknown monster class: " + monsterCls);
+			}
 		}
 	}
 }

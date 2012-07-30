@@ -7,8 +7,8 @@ package kacount.route {
 	import kacount.util.Num;
 	import kacount.util.RNG;
 	import kacount.util.Vec2;
-	import kacount.util.contract.assume;
-	import kacount.util.contract.todo;
+	import kacount.util.debug.assume;
+	import kacount.util.debug.todo;
 	
 	public final class RouteGenerators {
 		public static var generators:Vector.<Function> = new <Function>[
