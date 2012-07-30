@@ -15,10 +15,12 @@ package kacount {
 	import kacount.util.Display;
 	import kacount.util.Ev;
 	import kacount.util.Histogram;
+	import kacount.util.Human;
 	import kacount.util.RNG;
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
 	import kacount.util.Touch;
+	import kacount.util.debug.assert;
 	import kacount.util.debug.isDebug;
 
 	public final class RoundController extends Controller {
@@ -63,8 +65,7 @@ package kacount {
 		
 		public function enter_instructions():void {
 			var goalScreen:GoalScreen = new GoalScreen();
-			var labeledMonsterCls:Class = Monster.getLabeledClass(this._goals[0]);
-			Display.replace(goalScreen.bug, new labeledMonsterCls());
+			showMonsterLabels(this._goals, goalScreen);
 			this._root.addChild(goalScreen);
 			
 			setTimeout(this._sm.play, 4000);
@@ -132,24 +133,37 @@ package kacount {
 			});
 		}
 		
+		public function exit_counting():void {
+			this._root.removeChildren();
+		}
+		
 		public override function tick():void {
 			if (this._gs) {
 				this._gs.tick();
 				
 				if (this._roundDone && this._gs.monsters.length === 0) {
+					this._gs = null;
 					this._sm.stop();
 				}
 			}
 		}
 		
 		public function enter_score():void {
-			trace("So ....  there were " + this._monsterHist.total(_goals) + " matching monsters");
-			trace("Let's see what each player wrote:");
-			this._gs.players.forEach(function (_:*, playerIndex:uint, _array:*):void {
-				trace("Player " + playerIndex + ": " + this._playerHist.count(uint(playerIndex)));
-			}, this);
+			var resultsScreen:ResultsScreen = new ResultsScreen();
+			resultsScreen.count.text = Human.quantity(this._monsterHist.total(this._goals));
+			showMonsterLabels(this._goals, resultsScreen);
+			this._root.addChild(resultsScreen);
 			
-			this._sm.end();
+			resultsScreen.player1Count.text = Human.quantity(this._playerHist.count(0));
+			resultsScreen.player2Count.text = Human.quantity(this._playerHist.count(1));
+			
+			setTimeout(this._sm.end, 3000);
+		}
+		
+		private static function showMonsterLabels(monsterClss:Vector.<Class>, original:DisplayObjectContainer):void {
+			assert(monsterClss.length === 1);  // TODO lax assertion
+			var labeledMonsterCls:Class = Monster.getLabeledClass(monsterClss[0]);
+			Display.replace(original.getChildByName('bug'), new labeledMonsterCls());
 		}
 	}
 }
