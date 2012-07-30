@@ -21,7 +21,7 @@ package kacount.util {
 		public static function map(xs:*, fn:Function):Array {
 			return mapc(xs, Array, fn);
 		}
-
+		
 		public static function foldl1(xs:*, fn:Function):* {
 			var acc:*;
 			var first:Boolean = true;
@@ -40,6 +40,78 @@ package kacount.util {
 			}
 			
 			return acc;
+		}
+		
+		public static function convertCollection(ctor:*, xs:*):* {
+			return mapc(xs, ctor, id);
+		}
+		
+		public static function foldr(xs:*, z:*, fn:Function):* {
+			var acc:* = z;
+			var xsArray:Array = convertCollection(Array, xs);
+			xsArray.reverse();
+			
+			for each (var x:* in xsArray) {
+				acc = fn(x, acc);
+			}
+			
+			return acc;
+		}
+		
+		public static function filter(xs:*, fn:Function):* {
+			return xs.filter(function (x:*, _i:uint, _array:*):Boolean {
+				return !!fn.call(this, x);
+			});
+		}
+		
+		public static function cat(... xss:*):Array {
+			return concat(xss);
+		}
+		
+		public static function catc(ctor:*, ... xss:*):* {
+			return concatc(xss, ctor);
+		}
+		
+		public static function concat(xss:*):Array {
+			return concatc(xss, Array);
+		}
+		
+		public static function concatc(xss:*, ctor:*):* {
+			var ys:* = new ctor();
+			for each (var xs:* in xss) {
+				for each (var x:* in xs) {
+					ys.push(x);
+				}
+			}
+			return ys;
+		}
+		
+		/**
+		 * Compare two values strictly.
+		 */
+		public static function eq(x:*, y:*):Boolean {
+			return x === y;
+		}
+		
+		/**
+		 * Curried eq.
+		 */
+		public static function eq_(x:*):Function {
+			return partial(eq, x);
+		}
+		
+		public static function not(x:Boolean):Boolean {
+			return !x;
+		}
+		
+		public static function compose(... fns:Array):* {
+			return function (... args:Array):* {
+				var self:Object = this;
+				var rets:Array = foldr(fns, args, function (fn:Function, curArgs:Array):Array {
+					return [ fn.apply(self, curArgs) ];
+				});
+				return rets[0];
+			};
 		}
 		
 		/**
@@ -134,6 +206,12 @@ package kacount.util {
 				for each (var fn:Function in fns) {
 					fn.apply(this, args);
 				}
+			};
+		}
+		
+		public static function partial(fn:Function, ... args:Array):Function {
+			return function (... moreArgs:Array):* {
+				return fn.apply(this, cat(args, moreArgs));
 			};
 		}
 		

@@ -23,5 +23,19 @@ package kacount.util {
 			
 			replacement.transform = original.transform;
 		}
+		
+		public static function add(parent:DisplayObjectContainer, child:DisplayObject):Cancel {
+			if (child.parent) {
+				throw new Error("Child already has a parent");
+			}
+			
+			parent.addChild(child);
+			
+			return new Cancel(function ():void {
+				if (child.parent === parent) {
+					parent.removeChild(child);
+				}
+			});
+		}
 	}
 }

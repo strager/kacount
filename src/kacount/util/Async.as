@@ -1,4 +1,7 @@
 package kacount.util {
+	import flash.utils.clearTimeout;
+	import flash.utils.setTimeout;
+
 	public class Async {
 		public static function join(fns:*, callback:Function):void {
 			fns = fns.slice();
@@ -65,6 +68,11 @@ package kacount.util {
 				var callback:Function = makeCallback(idx);
 				fn(callback);
 			});
+		}
+		
+		public static function timeout(ms:uint, callback:Function):Cancel {
+			var timer:uint = setTimeout(callback, ms);
+			return new Cancel(F.partial(clearTimeout, timer));
 		}
 	}
 }
