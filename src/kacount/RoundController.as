@@ -126,7 +126,7 @@ package kacount {
 				}
 			}));
 			
-			var spawner:Radioactive = new Radioactive(this._rng, 1 / 60, function ():void {
+			function spawnMonster():void {
 				var artClass:Class = _rng.sample(monsterClasses);
 				_monsterHist.inc(artClass);
 				
@@ -146,11 +146,13 @@ package kacount {
 				
 				var m:Monster = new Monster(art, route);
 				gs.spawnMonster(m);
-			});
+			}
+			
+			var spawner:Radioactive = new Radioactive(this._rng, 1 / 20, spawnMonster);
 			
 			var spawnMonsters:Boolean = true;
 			
-			var spawnFrameCount:uint = this._rng.integer(8, 12) * 60;
+			var spawnFrameCount:uint = this._rng.integer(15, 20) * 60;
 			var countdown:Countdown = new Countdown(spawnFrameCount, function ():void {
 				spawnMonsters = false;
 				
