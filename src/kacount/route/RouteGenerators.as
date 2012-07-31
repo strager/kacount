@@ -14,6 +14,7 @@ package kacount.route {
 		public static var generators:Vector.<Function> = new <Function>[
 //			linear,
 			manyLinear,
+			manyQuadBezier,
 		];
 		
 		private static function linear(
@@ -47,14 +48,60 @@ package kacount.route {
 			
 			var yCoords:Array = F.replicateM(xCoords.length, rng.double, walkRegion.top, walkRegion.bottom);
 			
-			var coords:Vector.<Vec2> = F.zipWithc(
-				xCoords, yCoords, Vector.<Vec2>,
+			var coords:Vector.<Vec2> = zipCoords(xCoords, yCoords);
+			
+			return new AggregateRoute(Vector.<IRoute>(
+				mapAdjacentPairs(coords, F.construct(LineRoute))
+			));
+		}
+		
+		private static function mapAdjacentPairs(xs:*, fn:Function):* {
+			var ys:Array = [];
+			for (var i:uint = 1; i < xs.length; ++i) {
+				ys.push(fn(xs[i - 1], xs[i]));
+			}
+			return ys;
+		}
+		
+		private static function zipCoords(xs:*, ys:*):Vector.<Vec2> {
+			return F.zipWithc(
+				xs, ys, Vector.<Vec2>,
 				F.construct(Vec2)
 			);
+		}
+		
+		private static function manyQuadBezier(
+			startRegion:Rectangle, endRegion:Rectangle,
+			walkRegion:Rectangle,
+			rng:RNG
+		):IRoute {
+			var segCount:uint = rng.integer(2, 10);
+			var xControlCoords:Array = F.replicateM(segCount - 1, rng.double, walkRegion.left, walkRegion.right);
+			xControlCoords.sort(Num.compare);
+			var yControlCoords:Array = F.replicateM(segCount - 1, rng.double, walkRegion.top, walkRegion.bottom);
+			
+			var controlCoords:Vector.<Vec2> = zipCoords(xControlCoords, yControlCoords);
+			
+			if (endRegion.left < startRegion.right) {
+				todo("Handle endRegion left of startRegion");
+			}
+			
+			var endCoords:Vector.<Vec2> = Vector.<Vec2>(
+				mapAdjacentPairs(controlCoords, function (a:Vec2, b:Vec2):Vec2 {
+					return Vec2.lerp(a, b, 0.5);
+				})
+			);
+			
+			endCoords.unshift(rng.randPoint(startRegion));
+			endCoords.push(rng.randPoint(endRegion));
 			
 			var segs:Vector.<IRoute> = new <IRoute>[];
-			for (var i:uint = 1; i < coords.length; ++i) {
-				segs.push(new LineRoute(coords[i - 1], coords[i]));
+			for (var i:uint = 0; i < endCoords.length - 1; ++i) {
+				segs.push(new QuadBezierRoute(
+					endCoords[i],
+					controlCoords[i],
+					endCoords[i + 1]
+				));
 			}
 			
 			return new AggregateRoute(segs);
