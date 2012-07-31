@@ -11,7 +11,6 @@ package kacount {
 	import kacount.art.*;
 	import kacount.route.IRoute;
 	import kacount.route.RouteGenerators;
-	import kacount.sound.Bloop;
 	import kacount.util.Async;
 	import kacount.util.Cancel;
 	import kacount.util.Countdown;
@@ -110,7 +109,7 @@ package kacount {
 			function playerHit(playerIndex:uint):void {
 				_playerHist.inc(playerIndex);
 				gs.players[playerIndex].gotoAndPlay('click');
-				new Bloop().play();
+				Sounds.bloop.play();
 			}
 			
 			gs.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {

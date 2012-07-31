@@ -7,6 +7,7 @@ package {
 	
 	import kacount.Controller;
 	import kacount.RoundController;
+	import kacount.Sounds;
 	import kacount.util.Ev;
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
@@ -24,16 +25,17 @@ package {
 		public function Main() {
 			this._sm = gameTemplate.create('none', this);
 			
-			this.init();
-			this._sm.start_round();
+			this.init(this._sm.start_round);
 		}
 
-		private function init():void {
+		private function init(callback:Function):void {
 			this.stage.frameRate = 60;
 			this.stage.align = StageAlign.TOP_LEFT;
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			
 			Ev.on(this, Event.ENTER_FRAME, this.onEnterFrame);
+			
+			Sounds.load(callback);
 		}
 		
 		private function onEnterFrame(event:Event):void {
