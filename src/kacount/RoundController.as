@@ -29,6 +29,7 @@ package kacount {
 	import kacount.util.debug.assert;
 	import kacount.util.debug.isDebug;
 	import kacount.view.GameScreen;
+	import kacount.view.Monster;
 
 	public final class RoundController extends Controller {
 		private static var monsterClasses:Array = [ Monster1, Monster2, Monster3 ];
@@ -129,6 +130,8 @@ package kacount {
 				}
 			}));
 			
+			var monsters:Vector.<Monster> = new <Monster>[];
+			
 			function spawnMonster():void {
 				var artClass:Class = _rng.sample(monsterClasses);
 				_monsterHist.inc(artClass);
@@ -151,6 +154,17 @@ package kacount {
 				
 				var m:Monster = new Monster(art, duration, positionRoute, speedRoute);
 				gs.spawnMonster(m);
+				monsters.push(m);
+			}
+			
+			function despawnMonster(m:Monster, ... _rest:Array):void {
+				gs.despawnMonster(m);
+				
+				var index:int = monsters.indexOf(m);
+				if (index < 0) {
+					throw new Error("Monster was not spawned or has already despawned");
+				}
+				monsters.splice(index, 1);
 			}
 			
 			var spawner:Radioactive = new Radioactive(this._rng, 1 / 20, spawnMonster);
@@ -162,7 +176,7 @@ package kacount {
 				spawnMonsters = false;
 				
 				addCancel(onTick(function ():void {
-					if (gs.monsters.length === 0) {
+					if (monsters.length === 0) {
 						_sm.stop();
 					}
 				}));
@@ -174,7 +188,12 @@ package kacount {
 				}
 				
 				countdown.dec();
-				gs.tick();
+
+				var m:Monster;
+				for each (m in monsters) {
+					m.tick();
+				}
+				monsters.filter(F.lookup('routeDone')).forEach(despawnMonster);
 			}));
 		}
 		

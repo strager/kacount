@@ -1,4 +1,4 @@
-package kacount {
+package kacount.view {
 	import flash.display.DisplayObject;
 	
 	import kacount.art.*;
