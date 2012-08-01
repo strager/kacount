@@ -28,6 +28,7 @@ package kacount {
 	import kacount.util.Touch;
 	import kacount.util.debug.assert;
 	import kacount.util.debug.isDebug;
+	import kacount.view.GameScreen;
 
 	public final class RoundController extends Controller {
 		private static var monsterClasses:Array = [ Monster1, Monster2, Monster3 ];

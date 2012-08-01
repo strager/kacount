@@ -1,9 +1,10 @@
-package kacount {
+package kacount.view {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.MovieClip;
 	import flash.geom.Rectangle;
 	
+	import kacount.Monster;
 	import kacount.art.*;
 	import kacount.util.Display;
 	import kacount.util.F;
