@@ -75,7 +75,9 @@ package kacount {
 			this._sm.onEnter('end', doneCallback);
 			
 			this._root = root;
-			
+		}
+		
+		public function start():void {
 			this._sm.start();
 		}
 		
