@@ -51,11 +51,7 @@ package {
 		}
 		
 		private function setController(fn:Function):void {
-			var s:Sprite = new Sprite();
-			this.removeChildren();
-			this.addChild(s);
-			
-			this._currentController = fn(s);
+			this._currentController = fn(this);
 		}
 	}
 }
