@@ -7,6 +7,10 @@ package kacount.util {
 			return a + b;
 		}
 		
+		public static function square(x:Number):Number {
+			return x * x;
+		}
+		
 		public static function compare(a:Number, b:Number, ... _rest:Array):int {
 			if (a < b) return -1;
 			if (a > b) return 1;

@@ -2,7 +2,7 @@ package kacount.route {
 	import avmplus.FLASH10_FLAGS;
 	
 	import flash.geom.Rectangle;
-
+	
 	import kacount.util.F;
 	import kacount.util.Num;
 	import kacount.util.RNG;
@@ -10,7 +10,7 @@ package kacount.route {
 	import kacount.util.debug.assume;
 	import kacount.util.debug.todo;
 	
-	public final class RouteGenerators {
+	public final class Route2DGen {
 		public static var generators:Vector.<Function> = new <Function>[
 //			linear,
 			manyLinear,
@@ -21,8 +21,8 @@ package kacount.route {
 			startRegion:Rectangle, endRegion:Rectangle,
 			walkRegion:Rectangle,
 			rng:RNG
-		):IRoute {
-			return new LineRoute(
+		):IRoute2D {
+			return new LineRoute2D(
 				rng.randPoint(startRegion),
 				rng.randPoint(endRegion)
 			);
@@ -32,7 +32,7 @@ package kacount.route {
 			startRegion:Rectangle, endRegion:Rectangle,
 			walkRegion:Rectangle,
 			rng:RNG
-		):IRoute {
+		):IRoute2D {
 			var segCount:uint = rng.integer(2, 10);
 			var xCoords:Array = F.replicateM(segCount - 1, rng.double, walkRegion.left, walkRegion.right);
 			xCoords.sort(Num.compare);
@@ -50,8 +50,8 @@ package kacount.route {
 			
 			var coords:Vector.<Vec2> = zipCoords(xCoords, yCoords);
 			
-			return new AggregateRoute(Vector.<IRoute>(
-				mapAdjacentPairs(coords, F.construct(LineRoute))
+			return new AggregateRoute2D(Vector.<IRoute2D>(
+				mapAdjacentPairs(coords, F.construct(LineRoute2D))
 			));
 		}
 		
@@ -74,7 +74,7 @@ package kacount.route {
 			startRegion:Rectangle, endRegion:Rectangle,
 			walkRegion:Rectangle,
 			rng:RNG
-		):IRoute {
+		):IRoute2D {
 			var segCount:uint = rng.integer(2, 10);
 			var xControlCoords:Array = F.replicateM(segCount - 1, rng.double, walkRegion.left, walkRegion.right);
 			xControlCoords.sort(Num.compare);
@@ -95,16 +95,16 @@ package kacount.route {
 			endCoords.unshift(rng.randPoint(startRegion));
 			endCoords.push(rng.randPoint(endRegion));
 			
-			var segs:Vector.<IRoute> = new <IRoute>[];
+			var segs:Vector.<IRoute2D> = new <IRoute2D>[];
 			for (var i:uint = 0; i < endCoords.length - 1; ++i) {
-				segs.push(new QuadBezierRoute(
+				segs.push(new QuadBezierRoute2D(
 					endCoords[i],
 					controlCoords[i],
 					endCoords[i + 1]
 				));
 			}
 			
-			return new AggregateRoute(segs);
+			return new AggregateRoute2D(segs);
 		}
 	}
 }

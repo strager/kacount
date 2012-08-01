@@ -3,11 +3,11 @@ package kacount.route {
 	
 	import kacount.util.Vec2;
 
-	public final class LineRoute implements IRoute {
+	public final class LineRoute2D implements IRoute2D {
 		private var _end:Vec2;
 		private var _start:Vec2;
 		
-		public function LineRoute(start:Vec2, end:Vec2) {
+		public function LineRoute2D(start:Vec2, end:Vec2) {
 			this._start = start;
 			this._end = end;
 		}

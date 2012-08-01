@@ -5,10 +5,10 @@ package kacount.route {
 	import kacount.util.Num;
 	import kacount.util.Vec2;
 
-	public final class AggregateRoute implements IRoute {
-		private var _segments:Vector.<IRoute>;
+	public final class AggregateRoute2D implements IRoute2D {
+		private var _segments:Vector.<IRoute2D>;
 		
-		public function AggregateRoute(segments:Vector.<IRoute>) {
+		public function AggregateRoute2D(segments:Vector.<IRoute2D>) {
 			if (segments.length < 1) {
 				throw new Error("Route must have at least one segment");
 			}
@@ -34,7 +34,7 @@ package kacount.route {
 			var curW:Number = 0;
 			var tW:Number = t * totalW;
 			
-			for each (var seg:IRoute in this._segments) {
+			for each (var seg:IRoute2D in this._segments) {
 				var nextW:Number = curW + seg.weight();
 				if (nextW > tW) {
 					var innerT:Number = Num.unlerp(curW, nextW, tW);
@@ -51,21 +51,21 @@ package kacount.route {
 		}
 		
 		public function debugDraw(g:Graphics):void {
-			for each (var seg:IRoute in this._segments) {
+			for each (var seg:IRoute2D in this._segments) {
 				seg.debugDraw(g);
 			}
 		}
 	}
 }
 
-import kacount.route.IRoute;
+import kacount.route.IRoute2D;
 
 // Awesome tuple type!
 class SegT {
-	public var seg:IRoute;
+	public var seg:IRoute2D;
 	public var t:Number;
 	
-	public function SegT(seg:IRoute, t:Number) {
+	public function SegT(seg:IRoute2D, t:Number) {
 		this.seg = seg;
 		this.t = t;
 	}

@@ -9,8 +9,10 @@ package kacount {
 	import flash.ui.Keyboard;
 	
 	import kacount.art.*;
-	import kacount.route.IRoute;
-	import kacount.route.RouteGenerators;
+	import kacount.route.IRoute1D;
+	import kacount.route.IRoute2D;
+	import kacount.route.Route1DGen;
+	import kacount.route.Route2DGen;
 	import kacount.util.Async;
 	import kacount.util.Cancel;
 	import kacount.util.Countdown;
@@ -135,16 +137,18 @@ package kacount {
 				var walkRegion:Rectangle = gs.walkRegion;
 				
 				var art:DisplayObject = new artClass();
-				var route:IRoute = _rng.sample(RouteGenerators.generators)(
+				var positionRoute:IRoute2D = _rng.sample(Route2DGen.generators)(
 					startRegion, endRegion,
 					walkRegion, _rng
 				);
+				var speedRoute:IRoute1D = _rng.sample(Route1DGen.generators)(_rng);
+				var duration:uint = _rng.double(25, 30) * speedRoute.weight();
 				
 				if (isDebug) {
-					route.debugDraw(debugGraphics);
+					positionRoute.debugDraw(debugGraphics);
 				}
 				
-				var m:Monster = new Monster(art, route);
+				var m:Monster = new Monster(art, duration, positionRoute, speedRoute);
 				gs.spawnMonster(m);
 			}
 			

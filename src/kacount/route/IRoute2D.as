@@ -3,7 +3,7 @@ package kacount.route {
 	
 	import kacount.util.Vec2;
 
-	public interface IRoute {
+	public interface IRoute2D {
 		function point(t:Number):Vec2;
 		function delta(t:Number):Vec2;
 		function weight():Number;

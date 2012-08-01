@@ -4,14 +4,14 @@ package kacount.route {
 	import kacount.util.Num;
 	import kacount.util.Vec2;
 
-	public final class QuadBezierRoute implements IRoute {
+	public final class QuadBezierRoute2D implements IRoute2D {
 		private var _start:Vec2;
 		private var _control:Vec2;
 		private var _end:Vec2;
 		
 		private var _weight:Number;
 		
-		public function QuadBezierRoute(start:Vec2, control:Vec2, end:Vec2) {
+		public function QuadBezierRoute2D(start:Vec2, control:Vec2, end:Vec2) {
 			this._start = start;
 			this._control = control;
 			this._end = end;
