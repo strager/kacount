@@ -148,7 +148,7 @@ package kacount {
 					walkRegion, _rng
 				);
 				var speedRoute:IRoute1D = _rng.sample(Route1DGen.generators)(_rng);
-				var duration:uint = _rng.double(25, 30) * speedRoute.weight();
+				var duration:uint = _rng.double(140, 170);
 				
 				if (isDebug) {
 					positionRoute.debugDraw(debugGraphics);

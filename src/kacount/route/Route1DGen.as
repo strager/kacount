@@ -1,35 +1,48 @@
 package kacount.route {
+	import kacount.util.F;
 	import kacount.util.Num;
 	import kacount.util.RNG;
 
 	public final class Route1DGen {
 		public static var generators:Vector.<Function> = new <Function>[
 			linear,
-			twoPauses,
+			F.partial(pauses, 2),
+			F.partial(pauses, 3),
+			F.partial(pauses, 4),
 		];
 		
 		private static function linear(rng:RNG):IRoute1D {
-			return new LineRoute1D(0, 1, 4.5);
+			return new LineRoute1D(0, 1, 1);
 		}
 		
-		private static function twoPauses(rng:RNG):IRoute1D {
-			var stop1X:Number = Num.square(rng.double(0, 0.6));
-			var stop2X:Number = rng.double(stop1X, 1);
+		private static function pauses(pauseCount:uint, rng:RNG):IRoute1D {
+			const minStopDuration:Number = 0.2;
+			const maxStopDuration:Number = 0.6;
+			var pauses:Array = F.replicateM(
+				pauseCount, rng.double,
+				minStopDuration / pauseCount,
+				maxStopDuration / pauseCount
+			);
 			
-			var stop1W:Number = rng.double(0.5, 1);
-			var stop2W:Number = rng.double(0.5, 1);
+			var totalPauseW:Number = Num.sum(pauses);
+			var totalPointW:Number = 1 - totalPauseW;
 			
-			var seg1W:Number = rng.double(0.75, 3);
-			var seg2W:Number = rng.double(0.75, 3);
-			var seg3W:Number = rng.double(0.75, 3);
+			const yCount:uint = pauseCount + 1;
+			var rawPoints:Array = F.replicateM(yCount, rng.double, 0.1, 0.9);
+			var rawTotal:Number = Num.sum(rawPoints);
+			var ys:Array = F.map(rawPoints, F.partial(Num.mult, 1 / rawTotal));
+			var xs:Array = F.map(rawPoints, F.partial(Num.mult, totalPointW / rawTotal));
 			
-			return new AggregateRoute1D(new <IRoute1D>[
-				new LineRoute1D(     0, stop1X, seg1W),
-				new LineRoute1D(stop1X, stop1X, stop1W),
-				new LineRoute1D(stop1X, stop2X, seg2W),
-				new LineRoute1D(stop2X, stop2X, stop1W),
-				new LineRoute1D(stop2X,      1, seg3W),
-			]);
+			var routes:Vector.<IRoute1D> = new <IRoute1D>[];
+			var y:Number = 0;
+			for (var i:uint = 0; i < pauses.length; ++i) {
+				routes.push(new LineRoute1D(y, y + ys[i], xs[i]));
+				y += ys[i];
+				routes.push(new LineRoute1D(y, y, pauses[i]));
+			}
+			routes.push(new LineRoute1D(y, 1, xs[xs.length - 1]));
+			
+			return new AggregateRoute1D(routes);
 		}
 	}
 }

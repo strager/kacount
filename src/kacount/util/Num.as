@@ -7,6 +7,17 @@ package kacount.util {
 			return a + b;
 		}
 		
+		/**
+		 * Multiplies the first two arguments.  Ignores the remaining arguments.
+		 */
+		public static function mult(a:Number, b:Number, ... _rest:Array):Number {
+			return a * b;
+		}
+		
+		public static function sum(xs:*):Number {
+			return F.foldr(xs, 0, add);
+		}
+		
 		public static function square(x:Number):Number {
 			return x * x;
 		}
