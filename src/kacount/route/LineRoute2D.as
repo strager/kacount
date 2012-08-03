@@ -17,7 +17,7 @@ package kacount.route {
 		}
 		
 		public function delta(t:Number):Vec2 {
-			return this._start.minus(this._end).normalize();
+			return this._end.minus(this._start).normalize();
 		}
 		
 		public function weight():Number {
