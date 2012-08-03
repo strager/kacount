@@ -12,7 +12,7 @@ package {
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
 
-	[SWF(frameRate="60", width="1024", height="768")]
+	[SWF(frameRate=60, width=1024, height=768)]
 	public class Main extends Sprite {
 		private var _sm:StateMachine;
 		private var _currentController:Controller;
