@@ -1,18 +1,17 @@
 package kacount.route {
+	import avmplus.FLASH10_FLAGS;
+	
 	import kacount.util.F;
 	import kacount.util.Num;
 	import kacount.util.RNG;
 
 	public final class Route1DGen {
-		public static var generators:Vector.<Function> = new <Function>[
-			linear,
-			F.partial(pauses, 2),
-			F.partial(pauses, 3),
-			F.partial(pauses, 4),
-		];
-		
-		private static function linear(rng:RNG):IRoute1D {
+		public static function linear(rng:RNG):IRoute1D {
 			return new LineRoute1D(0, 1, 1);
+		}
+		
+		public static function mkPauses(pauseCount:uint):Function {
+			return F.partial(pauses, pauseCount);
 		}
 		
 		private static function pauses(pauseCount:uint, rng:RNG):IRoute1D {

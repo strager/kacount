@@ -11,13 +11,7 @@ package kacount.route {
 	import kacount.util.debug.todo;
 	
 	public final class Route2DGen {
-		public static var generators:Vector.<Function> = new <Function>[
-//			linear,
-			manyLinear,
-			manyQuadBezier,
-		];
-		
-		private static function linear(
+		public static function linear(
 			startRegion:Rectangle, endRegion:Rectangle,
 			walkRegion:Rectangle,
 			rng:RNG
@@ -28,7 +22,7 @@ package kacount.route {
 			);
 		}
 		
-		private static function manyLinear(
+		public static function manyLinear(
 			startRegion:Rectangle, endRegion:Rectangle,
 			walkRegion:Rectangle,
 			rng:RNG
@@ -70,7 +64,7 @@ package kacount.route {
 			);
 		}
 		
-		private static function manyQuadBezier(
+		public static function manyQuadBezier(
 			startRegion:Rectangle, endRegion:Rectangle,
 			walkRegion:Rectangle,
 			rng:RNG

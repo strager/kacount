@@ -21,6 +21,8 @@ package kacount.view {
 			this.update();
 		}
 
+		public function get speedRoute():IRoute1D { return this._speedRoute; }
+		public function get positionRoute():IRoute2D { return this._positionRoute; }
 		public function get art():DisplayObject { return _art; }
 		
 		public function get routeDone():Boolean {

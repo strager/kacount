@@ -32,7 +32,24 @@ package kacount {
 	import kacount.view.Monster;
 
 	public final class RoundController extends Controller {
-		private static var monsterClasses:Array = [ Monster1, Monster2, Monster3 ];
+		private static var monsterTemplates:Vector.<MonsterTemplate> = F.mapc([
+			{
+				name: "Bug2",
+				artClass: Monster1,
+				positionGens: [ Route2DGen.linear, Route2DGen.manyLinear ],
+				speedGens: [ Route1DGen.linear ]
+			}, {
+				name: "Horse Fly",
+				artClass: Monster2,
+				positionGens: [ Route2DGen.manyLinear ],
+				speedGens: [ Route1DGen.mkPauses(2), Route1DGen.mkPauses(3) ]
+			}, {
+				name: "Luna Moth",
+				artClass: Monster3,
+				positionGens: [ Route2DGen.manyQuadBezier ],
+				speedGens: [ Route1DGen.linear ]
+			},
+		], Vector.<MonsterTemplate>, MonsterTemplate.fromObject);
 		
 		private static var template:StateMachineTemplate = new StateMachineTemplate([
 			{ name: 'start', from: 'none',         to: 'instructions' },
@@ -43,7 +60,7 @@ package kacount {
 		
 		private var _doneCallback:Function;
 		
-		private var _goals:Vector.<Class>;
+		private var _goals:Vector.<MonsterTemplate>;
 		private var _monsterHist:Histogram;
 		private var _playerHist:Histogram;
 		
@@ -85,7 +102,7 @@ package kacount {
 			this._monsterHist = new Histogram();
 			this._playerHist = new Histogram();
 			
-			this._goals = new <Class>[ this._rng.sample(monsterClasses) ];
+			this._goals = new <MonsterTemplate>[ this._rng.sample(monsterTemplates) ];
 		}
 		
 		public function enter_instructions():void {
@@ -135,26 +152,21 @@ package kacount {
 			var monsters:Vector.<Monster> = new <Monster>[];
 			
 			function spawnMonster():void {
-				var artClass:Class = _rng.sample(monsterClasses);
-				_monsterHist.inc(artClass);
-				
 				var startRegion:Rectangle = _rng.sample(gs.spawnRegions);
 				var endRegion:Rectangle = _rng.sample(gs.despawnRegions);
 				var walkRegion:Rectangle = gs.walkRegion;
 				
-				var art:DisplayObject = new artClass();
-				var positionRoute:IRoute2D = _rng.sample(Route2DGen.generators)(
+				var monsterTemplate:MonsterTemplate = _rng.sample(monsterTemplates);
+				_monsterHist.inc(monsterTemplate);
+				var m:Monster = monsterTemplate.makeMonster(
 					startRegion, endRegion,
 					walkRegion, _rng
 				);
-				var speedRoute:IRoute1D = _rng.sample(Route1DGen.generators)(_rng);
-				var duration:uint = _rng.double(140, 170);
 				
 				if (isDebug) {
-					positionRoute.debugDraw(debugGraphics);
+					m.positionRoute.debugDraw(debugGraphics);
 				}
 				
-				var m:Monster = new Monster(art, duration, positionRoute, speedRoute);
 				gs.spawnMonster(m);
 				monsters.push(m);
 			}
@@ -220,9 +232,9 @@ package kacount {
 			this.runCancels();
 		}
 		
-		private static function showMonsterLabels(monsterClss:Vector.<Class>, original:DisplayObjectContainer):void {
-			assert(monsterClss.length === 1);  // TODO lax assertion
-			var labeledMonsterCls:Class = Monster.getLabeledClass(monsterClss[0]);
+		private static function showMonsterLabels(templates:Vector.<MonsterTemplate>, original:DisplayObjectContainer):void {
+			assert(templates.length === 1);  // TODO lax assertion
+			var labeledMonsterCls:Class = Monster.getLabeledClass(templates[0].artClass);
 			Display.replace(original.getChildByName('bug'), new labeledMonsterCls());
 		}
 	}
