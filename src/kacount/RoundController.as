@@ -1,5 +1,4 @@
 package kacount {
-	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
 	import flash.display.MovieClip;
@@ -10,24 +9,19 @@ package kacount {
 	import flash.ui.Keyboard;
 	
 	import kacount.art.*;
-	import kacount.route.IRoute1D;
-	import kacount.route.IRoute2D;
 	import kacount.route.Route1DGen;
 	import kacount.route.Route2DGen;
 	import kacount.util.Async;
 	import kacount.util.Cancel;
 	import kacount.util.Countdown;
-	import kacount.util.Display;
 	import kacount.util.Ev;
 	import kacount.util.F;
 	import kacount.util.Histogram;
-	import kacount.util.Human;
 	import kacount.util.RNG;
 	import kacount.util.Radioactive;
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
 	import kacount.util.Touch;
-	import kacount.util.debug.assert;
 	import kacount.util.debug.isDebug;
 	import kacount.view.GameScreen;
 	import kacount.view.Monster;
