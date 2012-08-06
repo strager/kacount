@@ -1,9 +1,13 @@
 package kacount.view {
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	
+	import kacount.MonsterTemplate;
 	import kacount.art.*;
 	import kacount.route.IRoute1D;
 	import kacount.route.IRoute2D;
+	import kacount.util.Display;
+	import kacount.util.debug.assert;
 
 	public final class Monster {
 		private var _art:DisplayObject;
@@ -51,6 +55,14 @@ package kacount.view {
 			case Monster3: return Monster3Labeled;
 			default: throw new Error("Unknown monster class: " + monsterCls);
 			}
+		}
+		
+		public static function showMonsterLabels(templates:Vector.<MonsterTemplate>, original:DisplayObjectContainer):void {
+			assert(templates.length === 1);  // TODO lax assertion
+			var labeledMonsterCls:Class = getLabeledClass(templates[0].artClass);
+			var monsterContainer:DisplayObjectContainer = DisplayObjectContainer(original.getChildByName('bug'));
+			monsterContainer.removeChildren();
+			monsterContainer.addChild(new labeledMonsterCls());
 		}
 	}
 }

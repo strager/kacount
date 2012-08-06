@@ -4,6 +4,7 @@ package kacount {
 	import flash.display.Graphics;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.events.KeyboardEvent;
 	import flash.geom.Rectangle;
 	import flash.ui.Keyboard;
@@ -64,11 +65,14 @@ package kacount {
 		private var _monsterHist:Histogram;
 		private var _playerHist:Histogram;
 		
-		private var _root:DisplayObjectContainer;
 		private var _rng:RNG = new RNG();
 
 		private var _sm:StateMachine;
 		private var _stateCancel:Cancel;
+		
+		private var _gameScreen:GameScreen = new GameScreen();
+		
+		private var _stage:Stage;
 		
 		private function addCancel(... cancels:Array):void {
 			var notNull:Function = F.compose(F.not, F.eq_(null));
@@ -87,14 +91,14 @@ package kacount {
 			}
 		}
 		
-		public function RoundController(root:DisplayObjectContainer, doneCallback:Function) {
+		public function RoundController(doneCallback:Function) {
 			this._sm = template.create('none', this);
 			this._sm.onEnter('end', doneCallback);
-			
-			this._root = root;
 		}
 		
-		public function start():void {
+		public function start(root:DisplayObjectContainer):void {
+			this._stage = root.stage;
+			root.addChild(this._gameScreen.art);
 			this._sm.start();
 		}
 		
@@ -106,11 +110,8 @@ package kacount {
 		}
 		
 		public function enter_instructions():void {
-			var goalScreen:GoalScreen = new GoalScreen();
-			showMonsterLabels(this._goals, goalScreen);
-			
-			this.addCancel(Display.add(this._root, goalScreen));
-			this.addCancel(Async.timeout(4000, this._sm.play)); 
+			this._gameScreen.showGoal(this._goals);
+			this.addCancel(Async.timeout(4000, this._sm.play));
 		}
 		
 		public function exit_instructions():void {
@@ -118,31 +119,29 @@ package kacount {
 		}
 		
 		public function enter_counting():void {
-			var debugSprite:Sprite = new Sprite();
+			var debugSprite:Sprite = this._gameScreen.debugLayer;
 			var debugGraphics:Graphics = debugSprite.graphics;
 			debugGraphics.lineStyle(5, 0xFF00FF, 1);
 			
-			this.addCancel(Display.add(this._root, debugSprite));
-			
-			var art:DisplayObjectContainer = new Screen();
-			var gs:GameScreen = new GameScreen(art);
-			
-			this.addCancel(Display.add(this._root, art));
+			this._gameScreen.startRound();
 			
 			function playerHit(playerIndex:uint):void {
-				_playerHist.inc(playerIndex);
-				gs.players[playerIndex].gotoAndPlay('click');
-				Sounds.bloop.play();
+				var players:Vector.<MovieClip> = _gameScreen.players;
+				if (players.length > playerIndex) {
+					_playerHist.inc(playerIndex);
+					players[playerIndex].gotoAndPlay('click');
+					Sounds.bloop.play();
+				}
 			}
 			
-			gs.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
+			_gameScreen.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
 				this.addCancel(Touch.down(player, function onDown():void {
 					playerHit(playerIndex);
 				}));
 			}, this);
 			
 			var playerKeys:Vector.<uint> = new <uint>[Keyboard.Q, Keyboard.P];
-			this.addCancel(Ev.on(this._root.stage, KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
+			this.addCancel(Ev.on(this._stage, KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
 				var playerIndex:int = playerKeys.indexOf(event.keyCode);
 				if (playerIndex >= 0) {
 					playerHit(playerIndex);
@@ -152,9 +151,9 @@ package kacount {
 			var monsters:Vector.<Monster> = new <Monster>[];
 			
 			function spawnMonster():void {
-				var startRegion:Rectangle = _rng.sample(gs.spawnRegions);
-				var endRegion:Rectangle = _rng.sample(gs.despawnRegions);
-				var walkRegion:Rectangle = gs.walkRegion;
+				var startRegion:Rectangle = _rng.sample(_gameScreen.spawnRegions);
+				var endRegion:Rectangle = _rng.sample(_gameScreen.despawnRegions);
+				var walkRegion:Rectangle = _gameScreen.walkRegion;
 				
 				var monsterTemplate:MonsterTemplate = _rng.sample(monsterTemplates);
 				_monsterHist.inc(monsterTemplate);
@@ -167,12 +166,12 @@ package kacount {
 					m.positionRoute.debugDraw(debugGraphics);
 				}
 				
-				gs.spawnMonster(m);
+				_gameScreen.spawnMonster(m);
 				monsters.push(m);
 			}
 			
 			function despawnMonster(m:Monster, ... _rest:Array):void {
-				gs.despawnMonster(m);
+				_gameScreen.despawnMonster(m);
 				
 				var index:int = monsters.indexOf(m);
 				if (index < 0) {
@@ -185,7 +184,7 @@ package kacount {
 			
 			var spawnMonsters:Boolean = true;
 			
-			var spawnFrameCount:uint = this._rng.integer(15, 20) * 60;
+			var spawnFrameCount:uint = this._rng.integer(15, 20) * 20;
 			var countdown:Countdown = new Countdown(spawnFrameCount, function ():void {
 				spawnMonsters = false;
 				
@@ -216,26 +215,20 @@ package kacount {
 		}
 		
 		public function enter_score():void {
-			var resultsScreen:ResultsScreen = new ResultsScreen();
-			resultsScreen.count.text = Human.quantity(this._monsterHist.total(this._goals));
-			showMonsterLabels(this._goals, resultsScreen);
+			var playerCounts:Vector.<uint> = F.mapc(
+				F.uintKeys(this._gameScreen.players), Vector.<uint>,
+				this._playerHist.count
+			);
 			
-			this.addCancel(Display.add(this._root, resultsScreen));
+			var goalCount:uint = this._monsterHist.total(this._goals);
 			
-			resultsScreen.player1Count.text = Human.quantity(this._playerHist.count(0));
-			resultsScreen.player2Count.text = Human.quantity(this._playerHist.count(1));
+			this._gameScreen.endRound(goalCount, playerCounts);
 			
 			this.addCancel(Async.timeout(3000, this._sm.end));
 		}
 		
 		public function exit_score():void {
 			this.runCancels();
-		}
-		
-		private static function showMonsterLabels(templates:Vector.<MonsterTemplate>, original:DisplayObjectContainer):void {
-			assert(templates.length === 1);  // TODO lax assertion
-			var labeledMonsterCls:Class = Monster.getLabeledClass(templates[0].artClass);
-			Display.replace(original.getChildByName('bug'), new labeledMonsterCls());
 		}
 	}
 }

@@ -125,6 +125,28 @@ package kacount.util {
 			return xs;
 		}
 		
+		public static function forEach(xs:*, fn:Function):void {
+			for each (var x:* in xs) {
+				fn(x);
+			}
+		}
+		
+		public static function keys(x:*):Vector.<String> {
+			var keys:Vector.<String> = new <String>[];
+			for each (var key:String in x) {
+				keys.push(key);
+			}
+			return keys;
+		}
+		
+		public static function uintKeys(x:*):Vector.<uint> {
+			var keys:Vector.<uint> = new <uint>[];
+			for each (var key:uint in x) {
+				keys.push(key);
+			}
+			return keys;
+		}
+		
 		public static function zipWithc(xs:*, ys:*, ctor:*, fn:Function, ... args:Array):* {
 			var zs:* = new ctor();
 			for (var i:String in xs) {

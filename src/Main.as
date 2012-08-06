@@ -46,8 +46,8 @@ package {
 		
 		public function enter_playing():void {
 			this.setController(function (screen:DisplayObjectContainer):Controller {
-				var c:RoundController = new RoundController(screen, _sm.next_round);
-				c.start();
+				var c:RoundController = new RoundController(_sm.next_round);
+				c.start(screen);
 				return c;
 			});
 		}

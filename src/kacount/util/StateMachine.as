@@ -81,6 +81,8 @@ package kacount.util {
 			addCallback(this._exit, stateName, callback, self);
 		}
 		
+		public function get currentState():String { return this._state; }
+		
 		private static function addCallback(object:Object, name:String, callback:Function, self:Object):void {
 			var value:Function = callback;
 			if (self !== null) {
