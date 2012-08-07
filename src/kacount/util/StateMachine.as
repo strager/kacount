@@ -6,6 +6,7 @@ package kacount.util {
 		private var _on:Object = { };     // String => [Function]
 		private var _enter:Object = { };  // String => [Function]
 		private var _exit:Object = { };   // String => [Function]
+		private var _when:Object = { };   // String => [Function]
 		
 		public function StateMachine(initialState:String, template:StateMachineTemplate) {
 			this._state = initialState;
@@ -31,10 +32,15 @@ package kacount.util {
 			var ts:Vector.<StateTransition> = this._template.findTransitions(this._state, transitionName);
 			if (ts.length === 1) {
 				var t:StateTransition = ts[0];
-				this.callExit(t.from, args);
-				this.callOn(t.name, args);
-				this._state = t.to;
-				this.callEnter(t.to, args);
+				var override:Boolean = this.callWhen(t.label, args);
+				if (override) {
+					this._state = t.to;
+				} else {
+					this.callExit(t.from, args);
+					this.callOn(t.name, args);
+					this._state = t.to;
+					this.callEnter(t.to, args);
+				}
 			} else if (ts.length === 0) {
 				throw new Error(
 					"Cannot transition '" + transitionName + "'"
@@ -57,16 +63,20 @@ package kacount.util {
 			}
 		}
 		
-		private function callEnter(from:String, args:Array):void {
-			call(this._enter, from, args);
+		private function callEnter(to:String, args:Array):Boolean {
+			return call(this._enter, to, args);
 		}
 		
-		private function callOn(from:String, args:Array):void {
-			call(this._on, from, args);
+		private function callOn(name:String, args:Array):Boolean {
+			return call(this._on, name, args);
 		}
 		
-		private function callExit(from:String, args:Array):void {
-			call(this._exit, from, args);
+		private function callExit(from:String, args:Array):Boolean {
+			return call(this._exit, from, args);
+		}
+		
+		private function callWhen(label:String, args:Array):Boolean {
+			return call(this._when, label, args);
 		}
 		
 		public function on(transitionName:String, callback:Function, self:Object = null):void {
@@ -79,6 +89,10 @@ package kacount.util {
 		
 		public function onExit(stateName:String, callback:Function, self:Object = null):void {
 			addCallback(this._exit, stateName, callback, self);
+		}
+		
+		public function onLabel(label:String, callback:Function, self:Object = null):void {
+			addCallback(this._when, label, callback, self);
 		}
 		
 		public function get currentState():String { return this._state; }
@@ -94,12 +108,15 @@ package kacount.util {
 			object[name].push(value);
 		}
 		
-		private static function call(object:Object, name:String, args:Array):void {
+		private static function call(object:Object, name:String, args:Array):Boolean {
+			var called:Boolean = false;
 			if (object !== null && name in object) {
 				for each (var callback:Function in object[name]) {
+					called = true;
 					callback.apply(null, args);
 				}
 			}
+			return called;
 		}
 	}
 }

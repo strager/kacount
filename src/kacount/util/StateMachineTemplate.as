@@ -24,6 +24,9 @@ package kacount.util {
 				tryCallback('enter_', n, sm.onEnter);
 				tryCallback('exit_', n, sm.onExit);
 			}
+			for each (n in this.getLabels()) {
+				tryCallback('when_', n, sm.onLabel);
+			}
 			
 			return sm;
 		}
@@ -49,6 +52,10 @@ package kacount.util {
 				transitionLookup('from')
 				.concat(transitionLookup('to'))
 			);
+		}
+		
+		public function getLabels():Vector.<String> {
+			return transitionLookup('label');
 		}
 		
 		private function transitionLookup(propName:String):Vector.<String> {
