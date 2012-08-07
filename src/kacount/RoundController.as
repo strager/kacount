@@ -48,10 +48,12 @@ package kacount {
 		], Vector.<MonsterTemplate>, MonsterTemplate.fromObject);
 		
 		private static var template:StateMachineTemplate = new StateMachineTemplate([
-			{ name: 'start', from: 'none',         to: 'instructions' },
-			{ name: 'play',  from: 'instructions', to: 'counting' },
-			{ name: 'stop',  from: 'counting',     to: 'score' },
-			{ name: 'end',   from: 'score',        to: 'end' },
+			{ name: 'start',   from: 'none',       to: 'waiting' },
+			{ name: 'ready',   from: 'waiting',    to: 'countdown' },
+			{ name: 'unready', from: 'countdown',  to: 'waiting' },
+			{ name: 'play',    from: 'countdown',  to: 'counting' },
+			{ name: 'stop',    from: 'counting',   to: 'score' },
+			{ name: 'end',     from: 'score',      to: 'end' },
 		]);
 		
 		private var _doneCallback:Function;
@@ -62,12 +64,11 @@ package kacount {
 		
 		private var _rng:RNG = new RNG();
 
-		private var _sm:StateMachine;
+		private var _sm:StateMachine = template.create('none', this);
 		private var _stateCancel:Cancel;
+		private var _globalCancel:Cancel;
 		
 		private var _gameScreen:GameScreen = new GameScreen();
-		
-		private var _stage:Stage;
 		
 		private function addCancel(... cancels:Array):void {
 			var notNull:Function = F.compose(F.not, F.eq_(null));
@@ -87,29 +88,70 @@ package kacount {
 		}
 		
 		public function RoundController(doneCallback:Function) {
-			this._sm = template.create('none', this);
-			this._sm.onEnter('end', doneCallback);
+			this._sm.onEnter('end', function ():void {
+				_globalCancel.cancel();
+				doneCallback();
+			});
 		}
 		
 		public function start(root:DisplayObjectContainer):void {
-			this._stage = root.stage;
 			root.addChild(this._gameScreen.art);
+			
+			function playerHit(player:Player):void {
+				if (_sm.currentState === 'counting') {
+					_playerHist.inc(player);
+				}
+				
+				player.click();
+			}
+			
+			var playerKeys:Vector.<uint> = new <uint>[Keyboard.Q, Keyboard.P];
+			this._globalCancel = Ev.on(root.stage, KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
+				var playerIndex:int = playerKeys.indexOf(event.keyCode);
+				if (playerIndex >= 0 && playerIndex < _gameScreen.players.length) {
+					playerHit(_gameScreen.players[playerIndex]);
+				}
+			});
+			
+			F.forEach(_gameScreen.players, function (player:Player):void {
+				Touch.down(player.art, function onDown():void {
+					playerHit(player);
+				});
+			});
+			
 			this._sm.start();
 		}
 		
-		public function on_start():void {
+		public function enter_waiting():void {
+			this.addCancel(this.onTick(function ():void {
+				if (_gameScreen.hasReadyPlayer()) {
+					_sm.ready();
+				}
+			}));
+		}
+		
+		public function exit_waiting():void {
+			this.runCancels();
+		}
+		
+		public function enter_countdown():void {
 			this._monsterHist = new Histogram();
 			this._playerHist = new Histogram();
 			
 			this._goals = new <MonsterTemplate>[ this._rng.sample(monsterTemplates) ];
-		}
-		
-		public function enter_instructions():void {
+			
 			this._gameScreen.showGoal(this._goals);
 			this.addCancel(Async.timeout(4000, this._sm.play));
+			
+			this.addCancel(this.onTick(function ():void {
+				if (!_gameScreen.hasReadyPlayer()) {
+					_gameScreen.hideGoal();
+					_sm.unready();
+				}
+			}));
 		}
 		
-		public function exit_instructions():void {
+		public function exit_countdown():void {
 			this.runCancels();
 		}
 		
@@ -119,26 +161,6 @@ package kacount {
 			debugGraphics.lineStyle(5, 0xFF00FF, 1);
 			
 			this._gameScreen.startRound();
-			
-			function playerHit(player:Player):void {
-				_playerHist.inc(player);
-				player.click();
-				Sounds.bloop.play();
-			}
-			
-			F.forEach(_gameScreen.players, function (player:Player):void {
-				addCancel(Touch.down(player.art, function onDown():void {
-					playerHit(player);
-				}));
-			});
-			
-			var playerKeys:Vector.<uint> = new <uint>[Keyboard.Q, Keyboard.P];
-			this.addCancel(Ev.on(this._stage, KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
-				var playerIndex:int = playerKeys.indexOf(event.keyCode);
-				if (playerIndex >= 0 && playerIndex < _gameScreen.players.length) {
-					playerHit(_gameScreen.players[playerIndex]);
-				}
-			}));
 			
 			var monsters:Vector.<Monster> = new <Monster>[];
 			

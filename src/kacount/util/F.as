@@ -180,6 +180,17 @@ package kacount.util {
 		}
 		
 		/**
+		 * Returns a function which sets propName in its first argument,
+		 * returning that first argument.
+		 */
+		public static function set(propName:*, value:*):Function {
+			return function (obj:Object, ... _rest:Array):* {
+				obj[propName] = value;
+				return obj;
+			};
+		}
+		
+		/**
 		 * Returns a function which invokes a member function
 		 * on its first argument.
 		 */

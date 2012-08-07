@@ -1,6 +1,7 @@
 package kacount.view {
 	import flash.display.MovieClip;
 	
+	import kacount.Sounds;
 	import kacount.util.Human;
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
@@ -32,7 +33,11 @@ package kacount.view {
 			return this._sm.currentState === 'ready';
 		}
 				
-		public function click():void { this._sm.click(); }
+		public function click():void {
+			this._sm.click();
+			Sounds.bloop.play();
+		}
+		
 		public function start():void { this._sm.start(); }
 		public function results():void { this._sm.results(); }
 		

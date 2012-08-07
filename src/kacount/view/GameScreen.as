@@ -11,12 +11,12 @@ package kacount.view {
 	import kacount.util.Human;
 	import kacount.util.StateMachine;
 	import kacount.util.StateMachineTemplate;
-	import kacount.util.debug.assert;
 
 	public final class GameScreen {
 		private static var template:StateMachineTemplate = new StateMachineTemplate([
 			{ name: 'init',        from: 'none',         to: 'ready_screen' },
 			{ name: 'show_goal',   from: 'ready_screen', to: 'goal_screen' },
+			{ name: 'hide_goal',   from: 'goal_screen',  to: 'ready_screen' },
 			{ name: 'start_round', from: 'goal_screen',  to: 'game_screen' },
 			{ name: 'end_round',   from: 'game_screen',  to: 'results_screen' },
 		]);
@@ -42,9 +42,9 @@ package kacount.view {
 			this._despawnRegions = getBounds(this._art, despawns);
 			this._walkRegion = walk.getBounds(this._art);
 			
-			F.forEach(spawns, this._art.removeChild);
-			F.forEach(despawns, this._art.removeChild);
-			this._art.removeChild(walk);
+			F.forEach(spawns, F.set('visible', false));
+			F.forEach(despawns, F.set('visible', false));
+			walk.visible = false;
 			
 			this._players = F.mapc(
 				getNumbered(this._art, 'player'), Vector.<Player>,
@@ -65,6 +65,10 @@ package kacount.view {
 				F.partial(Monster.showMonsterLabels, templates),
 				F.lookup('art')
 			));
+		}
+		
+		public function hideGoal():void {
+			this._sm.hide_goal();
 		}
 		
 		public function startRound():void {
@@ -106,6 +110,14 @@ package kacount.view {
 		public function get walkRegion():Rectangle { return this._walkRegion; }
 		public function get debugLayer():Sprite { return this._debugLayer; }
 		public function get art():Screen { return this._art; }
+		
+		public function getReadyPlayers():Vector.<Player> {
+			return F.filter(this.players, F.lookup('isReady'));
+		}
+		
+		public function hasReadyPlayer():Boolean {
+			return this.getReadyPlayers().length > 0;
+		}
 
 		public function spawnMonster(m:Monster):void {
 			if (this._sm.currentState !== 'game_screen') {
