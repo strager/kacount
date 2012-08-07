@@ -1,9 +1,7 @@
 package kacount {
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
-	import flash.display.MovieClip;
 	import flash.display.Sprite;
-	import flash.display.Stage;
 	import flash.events.KeyboardEvent;
 	import flash.geom.Rectangle;
 	import flash.ui.Keyboard;
