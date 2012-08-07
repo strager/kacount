@@ -159,6 +159,9 @@ package kacount {
 			var debugGraphics:Graphics = debugSprite.graphics;
 			debugGraphics.lineStyle(5, 0xFF00FF, 1);
 			
+			// HACK; makes sure the tutorial arrow isn't shown again.
+			this._gameScreen.art.tutorial.visible = false;
+			
 			this._gameScreen.startRound();
 			
 			var monsters:Vector.<Monster> = new <Monster>[];
@@ -231,7 +234,7 @@ package kacount {
 			var goalCount:uint = this._monsterHist.total(this._goals);
 			this._gameScreen.endRound(goalCount, this._playerHist.count);
 			
-			this.addCancel(Async.timeout(3000, this._sm.reset));
+			this.addCancel(Async.timeout(5000, this._sm.reset));
 		}
 		
 		public function exit_score():void {
