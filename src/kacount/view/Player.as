@@ -34,8 +34,10 @@ package kacount.view {
 		}
 				
 		public function click():void {
-			this._sm.click();
-			Sounds.bloop.play();
+			if (this._sm.canTransition('click')) {
+				this._sm.click();
+				Sounds.bloop.play();
+			}
 		}
 		
 		public function start():void { this._sm.start(); }

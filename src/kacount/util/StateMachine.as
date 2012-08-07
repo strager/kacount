@@ -24,10 +24,22 @@ package kacount.util {
 			};
 		}
 		
-		public function transition(transitionName:String, ... args:Array):void {
-			if (!this._template.isTransition(transitionName)) {
-				throw new Error("Invalid transition: " + transitionName);
+		public function canTransition(transitionName:String):Boolean {
+			return this._template.findTransitions(this._state, transitionName).length > 0;
+		}
+		
+		private function validTransition(name:String):Boolean {
+			return this._template.isTransition(name);
+		}
+		
+		private function validateTransition(name:String):void {
+			if (!this.validTransition(name)) {
+				throw new Error("Invalid transition: " + name);
 			}
+		}
+		
+		public function transition(transitionName:String, ... args:Array):void {
+			this.validateTransition(transitionName);
 			
 			var ts:Vector.<StateTransition> = this._template.findTransitions(this._state, transitionName);
 			if (ts.length === 1) {
