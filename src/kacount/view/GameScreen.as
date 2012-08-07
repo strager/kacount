@@ -1,7 +1,6 @@
 package kacount.view {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
-	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.geom.Rectangle;
 	
@@ -23,7 +22,7 @@ package kacount.view {
 		]);
 		
 		private var _art:Screen = new Screen();
-		private var _players:Vector.<MovieClip>;
+		private var _players:Vector.<Player>;
 		
 		private var _monsterLayer:DisplayObjectContainer = new Sprite();
 		private var _debugLayer:Sprite = new Sprite();
@@ -48,8 +47,8 @@ package kacount.view {
 			this._art.removeChild(walk);
 			
 			this._players = F.mapc(
-				getNumbered(this._art, 'player'), Vector.<MovieClip>,
-				F.id
+				getNumbered(this._art, 'player'), Vector.<Player>,
+				F.construct(Player)
 			);
 
 			this._art.addChild(this._monsterLayer);  // Hack
@@ -62,21 +61,22 @@ package kacount.view {
 		public function showGoal(templates:Vector.<MonsterTemplate>):void {
 			this._sm.show_goal();
 			Monster.showMonsterLabels(templates, this._art);
-			F.forEach(this._players, F.partial(Monster.showMonsterLabels, templates));
+			F.forEach(this._players, F.compose(
+				F.partial(Monster.showMonsterLabels, templates),
+				F.lookup('art')
+			));
 		}
 		
 		public function startRound():void {
 			this._sm.start_round();
 		}
 		
-		public function endRound(goalTotal:uint, playerTotals:Vector.<uint>):void {
-			assert(playerTotals.length === this._players.length);
-			
+		public function endRound(goalTotal:uint, getPlayerTotal:Function):void {
 			this._art.bugCountContainer.bugCount.text = Human.quantity(goalTotal);
 			
-			this._players.forEach(function (player:MovieClip, i:uint, _array:*):void {
-				player.bugCountContainer.bugCount.text = Human.quantity(playerTotals[i]);
-			});
+			for each (var player:Player in this._players) {
+				player.setCount(getPlayerTotal(player));
+			}
 			
 			this._sm.end_round();
 		}
@@ -85,26 +85,21 @@ package kacount.view {
 			this._art.gotoAndPlay('ready_screen');
 		}
 		
-		public function exit_ready_screen():void {
-			// TODO ready vs CPU state
-			this._players.forEach(F.invoke('gotoAndPlay', 'ready'));
-		}
-		
 		public function enter_goal_screen():void {
 			this._art.gotoAndPlay('goal_screen');
 		}
 		
 		public function enter_game_screen():void {
-			this._players.forEach(F.invoke('gotoAndPlay', 'play'));
+			this._players.forEach(F.invoke('start'));
 			this._art.gotoAndPlay('game_screen');
 		}
 		
 		public function enter_results_screen():void {
-			this._players.forEach(F.invoke('gotoAndPlay', 'results'));
+			this._players.forEach(F.invoke('results'));
 			this._art.gotoAndPlay('results_screen');
 		}
 
-		public function get players():Vector.<MovieClip> { return this._players; }
+		public function get players():Vector.<Player> { return this._players; }
 		public function get spawnRegions():Vector.<Rectangle> { return this._spawnRegions; }
 		public function get despawnRegions():Vector.<Rectangle> { return this._despawnRegions; }
 		public function get numPlayers():uint { return this._players.length; }

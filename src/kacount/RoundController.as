@@ -25,6 +25,7 @@ package kacount {
 	import kacount.util.debug.isDebug;
 	import kacount.view.GameScreen;
 	import kacount.view.Monster;
+	import kacount.view.Player;
 
 	public final class RoundController extends Controller {
 		private static var monsterTemplates:Vector.<MonsterTemplate> = F.mapc([
@@ -119,26 +120,23 @@ package kacount {
 			
 			this._gameScreen.startRound();
 			
-			function playerHit(playerIndex:uint):void {
-				var players:Vector.<MovieClip> = _gameScreen.players;
-				if (players.length > playerIndex) {
-					_playerHist.inc(playerIndex);
-					players[playerIndex].gotoAndPlay('click');
-					Sounds.bloop.play();
-				}
+			function playerHit(player:Player):void {
+				_playerHist.inc(player);
+				player.click();
+				Sounds.bloop.play();
 			}
 			
-			_gameScreen.players.forEach(function (player:MovieClip, playerIndex:uint, _array:*):void {
-				this.addCancel(Touch.down(player, function onDown():void {
-					playerHit(playerIndex);
+			F.forEach(_gameScreen.players, function (player:Player):void {
+				addCancel(Touch.down(player.art, function onDown():void {
+					playerHit(player);
 				}));
-			}, this);
+			});
 			
 			var playerKeys:Vector.<uint> = new <uint>[Keyboard.Q, Keyboard.P];
 			this.addCancel(Ev.on(this._stage, KeyboardEvent.KEY_DOWN, function onKeyDown(event:KeyboardEvent):void {
 				var playerIndex:int = playerKeys.indexOf(event.keyCode);
-				if (playerIndex >= 0) {
-					playerHit(playerIndex);
+				if (playerIndex >= 0 && playerIndex < _gameScreen.players.length) {
+					playerHit(_gameScreen.players[playerIndex]);
 				}
 			}));
 			
@@ -209,14 +207,8 @@ package kacount {
 		}
 		
 		public function enter_score():void {
-			var playerCounts:Vector.<uint> = F.mapc(
-				F.uintKeys(this._gameScreen.players), Vector.<uint>,
-				this._playerHist.count
-			);
-			
 			var goalCount:uint = this._monsterHist.total(this._goals);
-			
-			this._gameScreen.endRound(goalCount, playerCounts);
+			this._gameScreen.endRound(goalCount, this._playerHist.count);
 			
 			this.addCancel(Async.timeout(3000, this._sm.end));
 		}
