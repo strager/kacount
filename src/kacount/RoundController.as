@@ -51,6 +51,7 @@ package kacount {
 			{ name: 'unready', from: 'countdown',  to: 'waiting' },
 			{ name: 'play',    from: 'countdown',  to: 'counting' },
 			{ name: 'stop',    from: 'counting',   to: 'score' },
+			{ name: 'reset',   from: 'score',      to: 'waiting' },
 			{ name: 'end',     from: 'score',      to: 'end' },
 		]);
 		
@@ -230,10 +231,11 @@ package kacount {
 			var goalCount:uint = this._monsterHist.total(this._goals);
 			this._gameScreen.endRound(goalCount, this._playerHist.count);
 			
-			this.addCancel(Async.timeout(3000, this._sm.end));
+			this.addCancel(Async.timeout(3000, this._sm.reset));
 		}
 		
 		public function exit_score():void {
+			this._gameScreen.endResults();
 			this.runCancels();
 		}
 	}

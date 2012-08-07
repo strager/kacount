@@ -14,11 +14,12 @@ package kacount.view {
 
 	public final class GameScreen {
 		private static var template:StateMachineTemplate = new StateMachineTemplate([
-			{ name: 'init',        from: 'none',         to: 'ready_screen' },
-			{ name: 'show_goal',   from: 'ready_screen', to: 'goal_screen' },
-			{ name: 'hide_goal',   from: 'goal_screen',  to: 'ready_screen' },
-			{ name: 'start_round', from: 'goal_screen',  to: 'game_screen' },
-			{ name: 'end_round',   from: 'game_screen',  to: 'results_screen' },
+			{ name: 'init',        from: 'none',           to: 'ready_screen' },
+			{ name: 'show_goal',   from: 'ready_screen',   to: 'goal_screen' },
+			{ name: 'hide_goal',   from: 'goal_screen',    to: 'ready_screen' },
+			{ name: 'start_round', from: 'goal_screen',    to: 'game_screen' },
+			{ name: 'end_round',   from: 'game_screen',    to: 'results_screen' },
+			{ name: 'reset',       from: 'results_screen', to: 'ready_screen' },
 		]);
 		
 		private var _art:Screen = new Screen();
@@ -83,6 +84,11 @@ package kacount.view {
 			}
 			
 			this._sm.end_round();
+		}
+		
+		public function endResults():void {
+			F.forEach(this._players, F.invoke('endResults'));
+			this._sm.reset();
 		}
 		
 		public function enter_ready_screen():void {

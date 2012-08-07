@@ -8,12 +8,13 @@ package kacount.view {
 
 	public final class Player {
 		private static var template:StateMachineTemplate = new StateMachineTemplate([
-			{ name: 'click',   from: 'unready', to: 'ready',   label: 'click_ready' },
-			{ name: 'click',   from: 'ready',   to: 'unready', label: 'click_unready' },
-			{ name: 'start',   from: 'unready', to: 'playing' },  // FIXME should be to CPU
-			{ name: 'start',   from: 'ready',   to: 'playing' },
-			{ name: 'click',   from: 'playing', to: 'playing', label: 'in_game_click' },
-			{ name: 'results', from: 'playing', to: 'results' },
+			{ name: 'click',       from: 'unready', to: 'ready',   label: 'click_ready' },
+			{ name: 'click',       from: 'ready',   to: 'unready', label: 'click_unready' },
+			{ name: 'start',       from: 'unready', to: 'playing' },  // FIXME should be to CPU
+			{ name: 'start',       from: 'ready',   to: 'playing' },
+			{ name: 'click',       from: 'playing', to: 'playing', label: 'in_game_click' },
+			{ name: 'results',     from: 'playing', to: 'results' },
+			{ name: 'end_results', from: 'results', to: 'ready',   label: 'end_ready' },
 		]);
 		
 		private var _art:MovieClip;
@@ -32,12 +33,16 @@ package kacount.view {
 		public function get isReady():Boolean {
 			return this._sm.currentState === 'ready';
 		}
-				
+		
 		public function click():void {
 			if (this._sm.canTransition('click')) {
 				this._sm.click();
 				Sounds.bloop.play();
 			}
+		}
+		
+		public function endResults():void {
+			this._sm.end_results();
 		}
 		
 		public function start():void { this._sm.start(); }
@@ -46,6 +51,7 @@ package kacount.view {
 		public function when_click_unready():void { this._art.gotoAndPlay('unready'); }
 		public function when_click_ready():void { this._art.gotoAndPlay('ready'); }
 		public function when_in_game_click():void { this._art.gotoAndPlay('click'); }
+		public function when_end_ready():void { this._art.gotoAndPlay('close_results'); }
 		
 		public function enter_click_to_play():void { this._art.gotoAndPlay('click_to_play'); }
 		public function enter_playing():void { this._art.gotoAndPlay('play'); }
