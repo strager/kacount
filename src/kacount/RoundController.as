@@ -140,12 +140,36 @@ package kacount {
 			this._goals = new <MonsterTemplate>[ this._rng.sample(monsterTemplates) ];
 			
 			this._gameScreen.showGoal(this._goals);
-			this.addCancel(Async.timeout(4000, this._sm.play));
+			
+			// Players must wait at least minWait frames.
+			// Players must wait an additional curWait frames.
+			// Each time a player changes state, curWait is reset.
+			const curWaitReset:uint = 60 * 1;
+			var minWait:uint = 60 * 3;
+			var curWait:uint = curWaitReset;
+			
+			var readyPlayerCount:uint = 0;
 			
 			this.addCancel(this.onTick(function ():void {
 				if (!_gameScreen.hasReadyPlayer()) {
 					_gameScreen.hideGoal();
 					_sm.unready();
+				} else {
+					// HACK; should really be an event or something
+					var nowReadyPlayerCount:uint = _gameScreen.getReadyPlayers().length;
+					if (nowReadyPlayerCount !== readyPlayerCount) {
+						curWait = curWaitReset;
+					}
+					
+					readyPlayerCount = nowReadyPlayerCount;
+					
+					if (minWait) {
+						--minWait;
+					} else if (curWait) {
+						--curWait;
+					} else {
+						_sm.play();
+					}
 				}
 			}));
 		}
